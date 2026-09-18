@@ -21,6 +21,7 @@
     "framer-motion": "^13.4.0",
     "http-status": "^2.1.0",
     "ioredis": "^6.0.0",
+    "jose": "^6.2.12",
     "js-cookie": "^3.0.8",
     "lucide-react": "^1.47.0",
     "next": "16.3.5",

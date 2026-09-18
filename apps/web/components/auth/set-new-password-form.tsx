@@ -31,19 +31,19 @@ export function SetNewPasswordForm() {
   if (done) {
     return (
       <div className="flex flex-col items-center gap-6 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-brand-panel">
-          <Check className="h-6 w-6 text-brand-panel" strokeWidth={2.5} />
+        <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-brand-accent">
+          <Check className="h-6 w-6 text-brand-accent" strokeWidth={2.5} />
         </div>
 
         <div className="flex flex-col gap-2">
-          <h1 className="font-serif text-4xl text-brand-panel">Password updated.</h1>
+          <h1 className="font-serif text-4xl text-brand-accent">Password updated.</h1>
           <p className="text-sm text-muted-foreground">
             Your password has been successfully changed.
           </p>
         </div>
 
         <Button asChild className="w-full">
-          <Link href="/login">Log in.</Link>
+          <Link href="/sign-in">Log in.</Link>
         </Button>
       </div>
     );
@@ -52,15 +52,15 @@ export function SetNewPasswordForm() {
   return (
     <div className="flex flex-col gap-6">
       <Link
-        href="/login"
-        className="flex items-center gap-1.5 text-sm text-brand-panel"
+        href="/sign-in"
+        className="flex items-center gap-1.5 text-sm text-brand-accent"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to log in
       </Link>
 
       <div className="flex flex-col gap-2">
-        <h1 className="font-serif text-4xl text-brand-panel">Set a new password.</h1>
+        <h1 className="font-serif text-4xl text-brand-accent">Set a new password.</h1>
         <p className="text-sm text-muted-foreground">
           This will sign you out of your other devices for security.
         </p>

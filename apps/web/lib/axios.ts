@@ -4,7 +4,7 @@ import { attachToken } from "./request";
 import { handleResponseError } from "./response";
 
 export const httpClient = axios.create({
-  baseURL: import.meta.env.NEXT_PUBLIC_APP_URL as string,
+  baseURL: `${process.env.NEXT_PUBLIC_APP_URL}/api` as string,
   withCredentials: true,
 });
 

@@ -1,7 +1,6 @@
 // components/layout/SiteHeader.tsx
 "use client";
 
-import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import {
   Sheet,
   SheetContent,
@@ -18,19 +18,21 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Input } from "@/components/ui/input";
+import { useAuthStore, useLogout } from "@/hooks";
 import { cn } from "@/lib/utils";
 import {
   Bell,
   ChevronDown,
   Gavel,
+  LogIn,
   MapPin,
   Menu,
   Search,
+  UserPlus,
 } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 import { ModeToggle } from "./mode-toggler";
-
 const CATEGORIES = [
   "Fine Watches",
   "Fine Art",
@@ -59,18 +61,29 @@ interface SiteHeaderProps {
 
 export function SiteHeader({
   activePath = "/how-it-works",
-  user = null,
   hasUnreadNotifications = true,
 }: SiteHeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const authUser = useAuthStore((s) => s.user);
+  const logoutMutation = useLogout();
+
+  const user = authUser
+    ? {
+        name: `${authUser.firstName} ${authUser.lastName}`,
+        avatarUrl: authUser.avatarUrl ?? undefined,
+      }
+    : null;
   return (
     <header className="border-b border-border bg-background">
       <div className="flex h-16 items-center gap-4 px-4 sm:h-20 sm:gap-6 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link href="/" className="flex shrink-0 items-center gap-2">
-          <Gavel className="h-5 w-5 text-brand-panel sm:h-6 sm:w-6" strokeWidth={2} />
-          <span className="font-serif text-xl text-brand-panel sm:text-2xl">
+          <Gavel
+            className="h-5 w-5 text-brand-accent sm:h-6 sm:w-6"
+            strokeWidth={2}
+          />
+          <span className="font-serif text-xl text-brand-accent sm:text-2xl">
             NovaLot
           </span>
         </Link>
@@ -84,7 +97,7 @@ export function SiteHeader({
               className={cn(
                 "pb-1 transition-colors hover:text-foreground",
                 activePath === link.href &&
-                  "text-foreground border-b-2 border-brand-panel",
+                  "text-foreground border-b-2 border-brand-accent",
               )}
             >
               {link.label}
@@ -172,17 +185,33 @@ export function SiteHeader({
                     <Link href="/bids">My bids</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>Log out</DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => logoutMutation.mutate()}
+                    disabled={logoutMutation.isPending}
+                  >
+                    Log out
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </>
           ) : (
             <div className="hidden items-center gap-2 sm:flex">
-              <Button variant="outline" asChild>
-                <Link href="/sign-in">Sign in</Link>
+              <Button
+                variant="outline"
+                size="sm"
+                asChild
+                className="h-9 gap-1.5 px-3.5"
+              >
+                <Link href="/sign-in">
+                  <LogIn className="h-4 w-4" />
+                  Sign in
+                </Link>
               </Button>
-              <Button asChild>
-                <Link href="/sign-up">Sign up</Link>
+              <Button size="sm" asChild className="h-9 gap-1.5 px-3.5">
+                <Link href="/sign-up">
+                  <UserPlus className="h-4 w-4" />
+                  Sign up
+                </Link>
               </Button>
             </div>
           )}
@@ -205,7 +234,7 @@ export function SiteHeader({
 
             <SheetContent side="right" className="w-[300px] p-0 sm:w-[360px]">
               <SheetHeader className="border-b border-border px-5 py-4">
-                <SheetTitle className="flex items-center gap-2 font-serif text-xl text-brand-panel">
+                <SheetTitle className="flex items-center gap-2 font-serif text-xl text-brand-accent">
                   <Gavel className="h-5 w-5" strokeWidth={2} />
                   NovaLot
                 </SheetTitle>
@@ -227,7 +256,7 @@ export function SiteHeader({
                       onClick={() => setMobileOpen(false)}
                       className={cn(
                         "rounded-sm px-2 py-2.5 text-sm font-medium text-foreground/80 hover:bg-muted",
-                        activePath === link.href && "text-brand-panel",
+                        activePath === link.href && "text-brand-accent",
                       )}
                     >
                       {link.label}
@@ -274,7 +303,10 @@ export function SiteHeader({
                   {user ? (
                     <>
                       <Button asChild className="w-full">
-                        <Link href="/auctions/create" onClick={() => setMobileOpen(false)}>
+                        <Link
+                          href="/auctions/create"
+                          onClick={() => setMobileOpen(false)}
+                        >
                           Create Auction
                         </Link>
                       </Button>
@@ -305,20 +337,37 @@ export function SiteHeader({
                       </Link>
                       <button
                         type="button"
-                        className="rounded-sm px-2 py-2 text-left text-sm text-destructive hover:bg-muted"
+                        onClick={() => {
+                          setMobileOpen(false);
+                          logoutMutation.mutate();
+                        }}
+                        disabled={logoutMutation.isPending}
+                        className="rounded-sm px-2 py-2 text-left text-sm text-destructive hover:bg-muted disabled:opacity-50"
                       >
                         Log out
                       </button>
                     </>
                   ) : (
                     <>
-                      <Button variant="outline" asChild className="w-full">
-                        <Link href="/sign-in" onClick={() => setMobileOpen(false)}>
+                      <Button
+                        variant="outline"
+                        asChild
+                        className="w-full gap-1.5"
+                      >
+                        <Link
+                          href="/sign-in"
+                          onClick={() => setMobileOpen(false)}
+                        >
+                          <LogIn className="h-4 w-4" />
                           Sign in
                         </Link>
                       </Button>
-                      <Button asChild className="w-full">
-                        <Link href="/sign-up" onClick={() => setMobileOpen(false)}>
+                      <Button asChild className="w-full gap-1.5">
+                        <Link
+                          href="/sign-up"
+                          onClick={() => setMobileOpen(false)}
+                        >
+                          <UserPlus className="h-4 w-4" />
                           Sign up
                         </Link>
                       </Button>

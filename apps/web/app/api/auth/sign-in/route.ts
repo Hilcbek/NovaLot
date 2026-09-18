@@ -1,5 +1,6 @@
 import {
   db,
+  enforceRateLimit,
   logger,
   redis,
   signAccessToken,
@@ -8,6 +9,7 @@ import {
 } from "@/server";
 import { loginSchema } from "@novalot/shared/auth-validation";
 import { users } from "@novalot/shared/db/schema";
+import { RATE_LIMITS } from "@novalot/shared/rate-limit";
 import { validate } from "@novalot/shared/validation";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
@@ -16,6 +18,13 @@ const REFRESH_COOKIE_NAME = "refreshToken";
 const REFRESH_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days — match your refresh token expiry
 
 export async function POST(req: NextRequest) {
+  const limited = await enforceRateLimit(
+    req,
+    "login",
+    RATE_LIMITS.login,
+    "Too many login attempts. Try again later.",
+  );
+  if (limited) return limited;
   const body = await req.json();
   const result = validate(loginSchema, body);
 
@@ -43,6 +52,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       { error: "Invalid email or password" },
       { status: 401 },
+    );
+  }
+
+  if (!user.isEmailVerified) {
+    return NextResponse.json(
+      {
+        error: "Please verify your email before logging in.",
+        code: "EMAIL_NOT_VERIFIED",
+      },
+      { status: 403 },
     );
   }
 

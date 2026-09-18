@@ -11,7 +11,8 @@
     "./constants": "./src/constants/index.ts",
     "./logger": "./src/utils/logger.ts",
     "./auth-validation": "./src/validation/auth.validation.ts",
-    "./auth": "./src/auth/index.ts"
+    "./auth": "./src/auth/index.ts",
+    "./rate-limit": "./src/rate-limit/index.ts"
   },
   "scripts": {
     "db:generate": "drizzle-kit generate --config=drizzle.config.ts",
@@ -24,6 +25,7 @@
     "bcryptjs": "^3.0.3",
     "dotenv": "^18.0.0",
     "drizzle-orm": "^0.45.2",
+    "ioredis": "^6.0.0",
     "jose": "^6.2.12",
     "pg": "^8.23.0",
     "postgres": "^3.4.9",

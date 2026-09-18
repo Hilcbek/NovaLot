@@ -40,11 +40,31 @@ export interface VerifyEmailProps {
   expiresInMinutes?: number;
 }
 
+// Converts a raw minute count into the most natural unit for display —
+// e.g. 1440 minutes -> "1 day" instead of "1440 minutes".
+function formatExpiry(minutes: number): string {
+  if (minutes < 60) {
+    return `${minutes} minute${minutes === 1 ? "" : "s"}`;
+  }
+
+  const hours = minutes / 60;
+  if (hours < 24) {
+    const rounded = Math.round(hours);
+    return `${rounded} hour${rounded === 1 ? "" : "s"}`;
+  }
+
+  const days = hours / 24;
+  const rounded = Math.round(days);
+  return `${rounded} day${rounded === 1 ? "" : "s"}`;
+}
+
 export default function VerifyEmail({
   recipientName,
   verifyUrl,
   expiresInMinutes = 30,
 }: VerifyEmailProps) {
+  const expiryLabel = formatExpiry(expiresInMinutes);
+
   return (
     <Html>
       <Head />
@@ -64,7 +84,7 @@ export default function VerifyEmail({
             <Text style={paragraph}>
               Click the button below to verify your email address and finish
               setting up your NovaLot account. This link expires in{" "}
-              {expiresInMinutes} minutes.
+              {expiryLabel}.
             </Text>
 
             <Section style={buttonContainer}>

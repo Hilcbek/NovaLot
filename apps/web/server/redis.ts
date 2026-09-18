@@ -12,7 +12,7 @@ function createClient() {
     lazyConnect: true,
     maxRetriesPerRequest: 2,
     connectTimeout: 5000,
-    enableOfflineQueue: false,
+    enableOfflineQueue: true,
   });
 
   client.on("error", (err) => logger.error("redis connection error", { error: err }));

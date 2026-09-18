@@ -1,11 +1,11 @@
 "use client";
 
+import { useCurrentUser } from "@/hooks";
 import {
   environmentManager,
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-
 export function makeQueryClient() {
   return new QueryClient({
     defaultOptions: {
@@ -27,10 +27,17 @@ export function getQueryClient() {
   }
 }
 
+function AuthBootstrap({ children }: { children: React.ReactNode }) {
+  useCurrentUser();
+  return <>{children}</>;
+}
+
 export default function AppProviders({ children }: { children: React.ReactNode }) {
   const queryClient = getQueryClient();
 
   return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthBootstrap>{children}</AuthBootstrap>
+    </QueryClientProvider>
   );
 }

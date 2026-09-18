@@ -1,15 +1,24 @@
-import { createVerificationToken, db, hashPassword, sendEmail } from "@/server";
+
+import { createVerificationToken, db, enforceRateLimit, hashPassword, sendEmail } from "@/server";
 import { signupSchema } from "@novalot/shared/auth-validation";
 import { users } from "@novalot/shared/db/schema";
+import { RATE_LIMITS } from "@novalot/shared/rate-limit";
 import { validate } from "@novalot/shared/validation";
 import { eq } from "drizzle-orm";
 import httpStatus from "http-status";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const GENERIC_SIGNUP_MESSAGE =
   "If that email isn't already registered, check your inbox to verify your account.";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  const limited = await enforceRateLimit(
+    req,
+    "signup",
+    RATE_LIMITS.signup,
+    "Too many login attempts. Try again later.",
+  );
+  if (limited) return limited;
   const body = await req.json();
 
   const result = validate(signupSchema, body);
@@ -63,7 +72,7 @@ export async function POST(req: Request) {
     template: "verifyEmail",
     params: {
       recipientName: firstName,
-      verifyUrl: `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${rawToken}`,
+      verifyUrl: `${process.env.APP_URL}/verify-email?token=${rawToken}`,
       expiresInMinutes: 60 * 24,
     },
     to: email,

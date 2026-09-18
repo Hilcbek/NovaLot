@@ -9,13 +9,21 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
+        // bg-brand-panel + text-brand-panel-foreground is CORRECT here —
+        // this is a solid background with dedicated foreground token, not
+        // text sitting directly on bg-background. Leave this pair as-is.
         default:
-          "bg-[#173A2C] text-white shadow-none hover:bg-[#1f4a38] active:bg-[#122e22]",
+          "bg-brand-panel text-brand-panel-foreground shadow-none hover:opacity-90 active:opacity-80",
+
+        // This is the one that breaks in dark mode if it says text-brand-panel.
+        // text-foreground is theme-aware (dark text in light mode, light text
+        // in dark mode) since there's no solid brand background here to give
+        // it a matching foreground token.
         outline:
-          "border border-[#173A2C]/12 bg-transparent text-[#173A2C] shadow-none hover:bg-[#173A2C]/[0.04] active:bg-[#173A2C]/[0.07]",
-        ghost:
-          "bg-transparent text-[#173A2C] hover:bg-[#173A2C]/[0.05] active:bg-[#173A2C]/[0.08]",
-        link: "text-[#173A2C] underline-offset-4 hover:underline",
+          "border border-border bg-transparent text-foreground shadow-none hover:bg-muted active:bg-muted/80",
+
+        ghost: "bg-transparent text-foreground hover:bg-muted active:bg-muted/80",
+        link: "text-foreground underline-offset-4 hover:underline",
       },
       size: {
         default: "h-10 px-4 py-2",

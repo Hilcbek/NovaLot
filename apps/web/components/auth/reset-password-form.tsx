@@ -1,99 +1,102 @@
 // features/auth/components/reset-password-form.tsx
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { Controller, useForm } from "react-hook-form";
-import { ArrowLeft, Mail } from "lucide-react";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Field, FieldGroup, FieldLabel, FieldError } from "@/components/ui/field";
-
-type FormValues = { email: string };
+import { useResetPasswordMutation } from "@/hooks";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { resetPasswordSchema, type ResetPasswordInput } from "@novalot/shared/auth-validation";
+import { isAxiosError } from "axios";
+import { useSearchParams } from "next/navigation";
+import { Controller, useForm } from "react-hook-form";
 
 export function ResetPasswordForm() {
-  const [sentTo, setSentTo] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token") ?? "";
+  const { mutate, isPending } = useResetPasswordMutation();
 
   const {
     control,
     handleSubmit,
+    setValue,
+    setError,
     formState: { errors },
-  } = useForm<FormValues>({ defaultValues: { email: "" } });
+  } = useForm<ResetPasswordInput>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: { token, password: "", confirmPassword: "" },
+  });
 
-  function onSubmit(values: FormValues) {
-    setSentTo(values.email);
+  useEffect(() => {
+    setValue("token", token);
+  }, [token, setValue]);
+
+  function onSubmit(values: ResetPasswordInput) {
+    if (!token) {
+      setError("root", { message: "This reset link is missing or invalid." });
+      return;
+    }
+
+    mutate(values, {
+      onError: (error: unknown) => {
+        const message = isAxiosError(error)
+          ? (error.response?.data?.error ?? error.response?.data?.message)
+          : undefined;
+        setError("root", {
+          message: message ?? "Something went wrong. Please try again.",
+        });
+      },
+    });
   }
 
-  if (sentTo) {
+  if (!token) {
     return (
-      <div className="flex flex-col items-center gap-6 text-center">
-        <Mail className="h-10 w-10 text-brand-panel" strokeWidth={1.5} />
-
-        <div className="flex flex-col gap-2">
-          <h1 className="font-serif text-4xl text-brand-panel">Check your inbox.</h1>
-          <p className="text-sm text-muted-foreground">
-            We&apos;ve sent a password reset link to
-            <br />
-            <span className="font-medium text-foreground">{sentTo}.</span>
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => setSentTo(null)}
-          className="text-sm font-medium text-brand-panel underline"
-        >
-          Didn&apos;t get it? Resend link.
-        </button>
-
-        <Link
-          href="/login"
-          className="mt-2 flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to log in
-        </Link>
-      </div>
+      <p className="text-sm text-destructive">
+        This reset link is missing or invalid. Please request a new one.
+      </p>
     );
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <Link
-        href="/login"
-        className="flex items-center gap-1.5 text-sm text-brand-panel"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to log in
-      </Link>
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <FieldGroup>
+        <Controller
+          control={control}
+          name="password"
+          render={({ field }) => (
+            <Field data-invalid={!!errors.password}>
+              <FieldLabel htmlFor="password">New password</FieldLabel>
+              <Input id="password" type="password" {...field} />
+              {errors.password && <FieldError>{errors.password.message}</FieldError>}
+            </Field>
+          )}
+        />
 
-      <div className="flex flex-col gap-2">
-        <h1 className="font-serif text-4xl text-brand-panel">Reset your password.</h1>
-        <p className="text-sm text-muted-foreground">
-          We&apos;ll send a link to your email address to help you create a new
-          password.
-        </p>
-      </div>
+        <Controller
+          control={control}
+          name="confirmPassword"
+          render={({ field }) => (
+            <Field data-invalid={!!errors.confirmPassword}>
+              <FieldLabel htmlFor="confirmPassword">Confirm new password</FieldLabel>
+              <Input id="confirmPassword" type="password" {...field} />
+              {errors.confirmPassword && (
+                <FieldError>{errors.confirmPassword.message}</FieldError>
+              )}
+            </Field>
+          )}
+        />
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <FieldGroup>
-          <Controller
-            control={control}
-            name="email"
-            render={({ field }) => (
-              <Field data-invalid={!!errors.email}>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
-                <Input id="email" type="email" placeholder="you@example.com" {...field} />
-                {errors.email && <FieldError>{errors.email.message}</FieldError>}
-              </Field>
-            )}
-          />
+        {errors.root && (
+          <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            {errors.root.message}
+          </p>
+        )}
 
-          <Button type="submit" className="w-full">
-            Send reset link
-          </Button>
-        </FieldGroup>
-      </form>
-    </div>
+        <Button type="submit" disabled={isPending} className="w-full">
+          {isPending ? "Resetting..." : "Reset password"}
+        </Button>
+      </FieldGroup>
+    </form>
   );
 }

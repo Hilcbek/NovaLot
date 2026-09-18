@@ -2,6 +2,7 @@
 
 interface ImportMetaEnv {
   readonly NEXT_PUBLIC_APP_URL: string;
+  readonly APP_URL: string;
   // Add other custom environment variables here...
 }
 

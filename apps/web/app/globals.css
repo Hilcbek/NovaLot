@@ -5,6 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+    --color-brand-accent: var(--brand-accent);
    --color-brand-panel: var(--brand-panel);
   --color-brand-panel-foreground: var(--brand-panel-foreground);
   --color-brand-gold: var(--brand-gold);
@@ -52,6 +53,7 @@
 }
 
 :root {
+    --brand-accent: oklch(0.28 0.045 155);
   --brand-panel: oklch(0.28 0.045 155);        /* deep green, ≈ #173A2C */
   --brand-panel-foreground: oklch(0.98 0.01 90); /* warm off-white */
   --brand-gold: oklch(0.62 0.11 75); 
@@ -90,6 +92,7 @@
 }
 
 .dark {
+    --brand-accent: oklch(0.78 0.09 155);
    --brand-panel: oklch(0.2 0.04 155);
   --brand-panel-foreground: oklch(0.95 0.01 90);
   --brand-gold: oklch(0.7 0.11 75);
