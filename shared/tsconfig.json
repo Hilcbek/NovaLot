@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022"],
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "declaration": false,
+    "noEmit": true,
+    "types": ["node", "react"]
+  },
+  "include": ["src", "drizzle.config.ts"]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "novalot",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "shared"
+  ],
+  "scripts": {
+    "dev:web": "bun --filter web dev",
+    "dev:socket": "bun --filter socket dev",
+    "db:generate": "bun --filter @novalot/shared db:generate",
+    "db:migrate": "bun --filter @novalot/shared db:migrate",
+    "db:push": "bun --filter @novalot/shared db:push"
+  }
+}

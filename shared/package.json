@@ -1,0 +1,45 @@
+{
+  "name": "@novalot/shared",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./db": "./src/db/index.ts",
+    "./db/schema": "./src/db/schema.ts",
+    "./validation": "./src/validation/index.ts",
+    "./email": "./src/email/index.tsx",
+    "./constants": "./src/constants/index.ts",
+    "./logger": "./src/utils/logger.ts",
+    "./auth-validation": "./src/validation/auth.validation.ts",
+    "./auth": "./src/auth/index.ts"
+  },
+  "scripts": {
+    "db:generate": "drizzle-kit generate --config=drizzle.config.ts",
+    "db:migrate": "drizzle-kit migrate --config=drizzle.config.ts",
+    "db:push": "drizzle-kit push --config=drizzle.config.ts"
+  },
+  "dependencies": {
+    "@react-email/components": "^0.0.31",
+    "@react-email/render": "^2.1.0",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^18.0.0",
+    "drizzle-orm": "^0.45.2",
+    "jose": "^6.2.12",
+    "pg": "^8.23.0",
+    "postgres": "^3.4.9",
+    "react": "^19.3.0",
+    "resend": "^4.0.0",
+    "winston": "^3.19.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^3.0.0",
+    "@types/node": "^26.6.1",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^19.3.0",
+    "drizzle-kit": "0.31.0",
+    "react-email": "^6.9.5",
+    "tsx": "^4.23.13",
+    "typescript": "^5.6.0"
+  }
+}
