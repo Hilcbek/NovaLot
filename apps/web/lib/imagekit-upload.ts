@@ -8,7 +8,9 @@ export interface UploadedImage {
   thumbnailUrl: string;
 }
 
-export async function uploadImageToImageKit(file: File): Promise<UploadedImage> {
+export async function uploadImageToImageKit(
+  file: File,
+): Promise<UploadedImage> {
   const { data: auth } = await httpClient.get("/imagekit/auth");
 
   const imagekit = new ImageKit({
@@ -26,7 +28,7 @@ export async function uploadImageToImageKit(file: File): Promise<UploadedImage> 
         signature: auth.signature,
         expire: auth.expire,
       },
-      (err, result) => {
+      (err: Error | null, result: any | null) => {
         if (err || !result) return reject(err ?? new Error("Upload failed"));
         resolve({
           fileId: result.fileId,
