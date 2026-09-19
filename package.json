@@ -19,5 +19,9 @@
     "db:generate": "bun --filter @novalot/shared db:generate",
     "db:migrate": "bun --filter @novalot/shared db:migrate",
     "db:push": "bun --filter @novalot/shared db:push"
+  },
+  "dependencies": {
+    "imagekit": "^6.0.0",
+    "imagekit-javascript": "^4.0.1"
   }
 }

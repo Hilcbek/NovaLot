@@ -1,10 +1,9 @@
 // hooks/auth/use-current-user-query.ts
-import { useEffect } from "react";
+import { AuthUser } from "@/api";
+import { useAuthStore } from "@/hooks";
+import { httpClient, KEYS } from "@/lib";
 import { useQuery } from "@tanstack/react-query";
-import { KEYS } from "@/lib/keys";
-import { AuthUser } from "@/api/auth.api";
-import { useAuthStore } from "./use-auth";
-import { httpClient } from "@/lib";
+import { useEffect } from "react";
 
 export function useCurrentUser() {
   const setUser = useAuthStore((s) => s.setUser);

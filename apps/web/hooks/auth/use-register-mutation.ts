@@ -1,12 +1,12 @@
 // features/auth/hooks/use-auth-mutation.ts
 import { useRouter } from "next/navigation";
-import { AuthResponse, loginUser, registerUser } from "@/api/auth.api";
 import { getQueryClient } from "@/components/providers/AppProvider";
-import { setAccessToken } from "@/lib/token";
 import { KEYS } from "@/lib/keys";
 import { useMutation } from "@tanstack/react-query";
-import { useAuthStore } from "./use-auth";
+import { useAuthStore } from "@/hooks";
 import { LoginInput, SignupInput } from "@novalot/shared/auth-validation";
+import { AuthResponse, loginUser, registerUser } from "@/api";
+import { setAccessToken } from "@/lib";
 
 type AuthMode = "sign-up" | "login";
 type AuthInput = SignupInput | LoginInput;

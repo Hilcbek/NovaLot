@@ -1,2 +1,3 @@
-export * from './auth.validation'
-export * from './validation'
+export * from "./auth.validation";
+export * from "./category.validation";
+export * from "./validation";

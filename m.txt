@@ -1,0 +1,40 @@
+1. Database
+ auctions table: id, title, slug (unique), description, categoryId (FK → categories, restrict), sellerId (FK → users, restrict), startingPrice, currentPrice, reservePrice (nullable), buyNowPrice (nullable), bidIncrement, location, condition, status (enum: draft/scheduled/active/ended/cancelled — this is the stored status, set explicitly by the seller/system, not derived), startTime, endTime, createdAt, updatedAt
+ auction_images table: id, auctionId (FK, cascade — images should delete with the auction, unlike categories), url, displayOrder, isPrimary (boolean)
+ Indexes: categoryId, sellerId, status, endTime (browse/listing pages will sort/filter heavily on these)
+ relations(): auctions.category (one), auctions.seller (one), auctions.images (many); auction_images.auction (one)
+ Generate + migrate
+2. Shared validation
+ createAuctionSchema — title, description, categoryId, startingPrice, reservePrice (optional), buyNowPrice (optional), bidIncrement, location, condition, startTime, endTime, images (array, max 5, exactly one isPrimary: true)
+ updateAuctionSchema — partial, same shape
+ Cross-field rule: endTime must be after startTime; if buyNowPrice is set, it must be greater than startingPrice
+ Add ./auction-validation to shared/package.json exports
+3. Shared business logic
+ resolveEffectiveStatus(auction) — pure function: if stored status is cancelled, return that; else compare now against startTime/endTime to derive scheduled/active/ended on the fly. This is what every read path uses — the DB's stored status is the seller's intent (draft vs published vs cancelled), not the live state.
+ canEditAuction(auction, userId) — only the seller, and only while effective status is draft or scheduled (no editing core fields once bidding could have started)
+ canCancelAuction(auction, userId) — seller can cancel while draft/scheduled; only admin can cancel an active auction (mid-auction cancellation is riskier, likely needs a reason/notification later)
+ Add to ./category sibling or a new ./auction shared export (framework-agnostic, no DB/Next types)
+4. API routes — public (apps/web/app/api/auctions)
+ GET /api/auctions — paginated list, filters: categoryId (include subcategories per the category work), status (effective), search, sort (ending soon / newest / price)
+ GET /api/auctions/[slug] — single auction + images + category + seller (public fields only)
+5. API routes — seller-owned (apps/web/app/api/auctions continued)
+ POST /api/auctions — create; slug auto-derived from title (reuse slugify from categories); enforce 5-image max + exactly one primary at the validation layer
+ PATCH /api/auctions/[id] — update; must call canEditAuction before allowing the write, not just check ownership
+ DELETE /api/auctions/[id] — likely should be "cancel" instead of hard delete once any bid exists (bids reference the auction) — for now, hard delete only allowed while draft
+ PATCH /api/auctions/[id]/cancel — separate endpoint from generic update, gated by canCancelAuction
+6. Middleware
+ /api/auctions POST/PATCH/DELETE need auth (session-existence check) — add to PROTECTED_API_PREFIXES; GET stays public
+ /auctions/create and /auctions/[id]/edit pages need auth — add to PROTECTED_PAGE_PREFIXES
+7. Client API + hooks
+ api/auctions.api.ts — fetchAuctions(filters), fetchAuctionBySlug, createAuction, updateAuction, cancelAuction
+ useAuctions(filters) — TanStack Query, keyed by filter params
+ useAuction(slug) — single auction
+ useCreateAuctionMutation, useUpdateAuctionMutation, useCancelAuctionMutation
+8. Seller UI
+ /auctions/create — multi-step or single-page form: details → pricing → schedule → images (5 max, primary picker)
+ /auctions/[id]/edit — same form, pre-filled, disabled once canEditAuction is false (show why)
+ Seller's "My Auctions" list (could live under /account) with status badges and a cancel action where allowed
+9. Public UI
+ /browse — grid/list, category filter (wired to the tree from step 9 of the category work), sort, pagination
+ /auctions/[slug] — detail page: image gallery, price, countdown to endTime, seller info, category breadcrumb
+ /categories/[slug] — reuse the browse grid, pre-filtered to that category (+ subcategories)

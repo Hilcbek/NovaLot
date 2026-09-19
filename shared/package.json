@@ -12,7 +12,11 @@
     "./logger": "./src/utils/logger.ts",
     "./auth-validation": "./src/validation/auth.validation.ts",
     "./auth": "./src/auth/index.ts",
-    "./rate-limit": "./src/rate-limit/index.ts"
+    "./rate-limit": "./src/rate-limit/index.ts",
+    "./category-validation": "./src/validation/category.validation.ts",
+    "./category": "./src/category/index.ts",
+    "./auction-validation": "./src/validation/auction.validation.ts",
+    "./auction": "./src/auction/index.ts"
   },
   "scripts": {
     "db:generate": "drizzle-kit generate --config=drizzle.config.ts",

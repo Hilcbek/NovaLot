@@ -24,6 +24,9 @@ const envSchema = z.object({
   JWT_ACCESS_EXPIRY: z.string().default("15m"),
   JWT_REFRESH_EXPIRY: z.string().default("7d"),
 
+  IMAGEKIT_PUBLIC_KEY: z.string(),
+  IMAGEKIT_PRIVATE_KEY: z.string(),
+  IMAGEKIT_URL_ENDPOINT: z.url(),
   REDIS_URL: z.string(),
   REDIS_TLS: z.enum(["true", "false"]).default("false"),
   NEXT_PUBLIC_APP_URL: z.url().default("http://localhost:3000"),

@@ -6,6 +6,15 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.join(__dirname, "../.."), // -> novalot/
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "ik.imagekit.io",
+        pathname: "/Bekas/**",
+      },
+    ],
+  },
 };
 
 export default nextConfig;

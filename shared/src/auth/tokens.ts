@@ -11,7 +11,7 @@ export interface AccessTokenPayload extends JWTPayload {
   sub: string;
   id: string;
   email: string;
-  role?: string;
+  role?: "user" | "admin";
 }
 
 export interface RefreshTokenPayload extends JWTPayload {
@@ -22,7 +22,7 @@ export interface RefreshTokenPayload extends JWTPayload {
 type SignAccessTokenInput = {
   id: string;
   email: string;
-  role?: string;
+  role?: "user" | "admin";
 };
 
 type SignRefreshTokenInput = {

@@ -1,7 +1,7 @@
 // features/auth/hooks/use-reset-password-mutation.ts
+import { resetPassword } from "@/api";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { resetPassword } from "@/api/auth.api";
 
 export function useResetPasswordMutation() {
   const router = useRouter();

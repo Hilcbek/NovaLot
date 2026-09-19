@@ -1,10 +1,10 @@
 // features/auth/hooks/use-logout.ts
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { logoutUser } from "@/api/auth.api";
-import { setAccessToken } from "@/lib/token";
 import { getQueryClient } from "@/components/providers/AppProvider";
-import { useAuthStore } from "./use-auth";
+import { useAuthStore } from "@/hooks";
+import { logoutUser } from "@/api";
+import { setAccessToken } from "@/lib";
 
 export function useLogout() {
   const router = useRouter();

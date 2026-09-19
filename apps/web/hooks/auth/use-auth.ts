@@ -1,5 +1,5 @@
 // hooks/use-auth.ts
-import { AuthUser } from "@/api/auth.api";
+import { AuthUser } from "@/api";
 import { create } from "zustand";
 
 interface AuthState {

@@ -8,6 +8,20 @@
       "when": 1789706134721,
       "tag": "0000_sad_squadron_sinister",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789790590257,
+      "tag": "0001_powerful_fallen_one",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789854923279,
+      "tag": "0002_groovy_eternity",
+      "breakpoints": true
     }
   ]
 }
