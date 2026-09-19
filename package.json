@@ -5,9 +5,17 @@
     "apps/*",
     "shared"
   ],
+  "author": {
+    "name": "Bereket Alemayehu",
+    "email": "balemayehu07@gmail.com",
+    "url": "https://bfanta.com"
+  },
+  "description": "This is an auction platform",
   "scripts": {
     "dev:web": "bun --filter web dev",
     "dev:socket": "bun --filter socket dev",
+    "build:web": "bun --filter web build",
+    "build:socket": "bun --filter socket build",
     "db:generate": "bun --filter @novalot/shared db:generate",
     "db:migrate": "bun --filter @novalot/shared db:migrate",
     "db:push": "bun --filter @novalot/shared db:push"

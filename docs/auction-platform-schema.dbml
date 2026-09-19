@@ -1,0 +1,135 @@
+// Auction Platform Database Schema
+// Docs: https://dbml.dbdiagram.io/docs
+
+Table users {
+  id uuid [primary key]
+  name varchar
+  email varchar [unique, not null]
+  password_hash varchar
+  role varchar [note: 'buyer / seller / admin']
+  email_verified boolean [default: false]
+  avatar_url varchar
+  created_at timestamp
+}
+
+Enum token_type {
+  password_reset
+  email_verification
+  email_change
+}
+
+Table verification_tokens {
+  id uuid [primary key]
+  user_id uuid [not null]
+  type token_type [not null]
+  token_hash text [not null, note: 'sha256 of the raw token — raw token is never stored']
+  identifier varchar [note: 'e.g. the new email address for an email_change token']
+  metadata jsonb
+  expires_at timestamp [not null]
+  used_at timestamp [note: 'null = still valid/unused']
+  created_at timestamp
+  ip_address varchar
+  user_agent text
+
+  indexes {
+    token_hash [name: 'verification_tokens_token_hash_idx']
+    (user_id, type) [name: 'verification_tokens_user_type_idx']
+  }
+}
+
+Table categories {
+  id uuid [primary key]
+  name varchar
+  slug varchar [unique]
+}
+
+Table auctions {
+  id uuid [primary key]
+  seller_id uuid [not null]
+  category_id uuid [not null]
+  title varchar
+  description text
+  starting_price decimal
+  current_highest_bid decimal
+  start_time timestamp
+  end_time timestamp
+  status varchar [note: 'draft / live / ended / sold']
+  created_at timestamp
+}
+
+Table auction_images {
+  id uuid [primary key]
+  auction_id uuid [not null]
+  url varchar
+  order integer
+}
+
+Table bids {
+  id uuid [primary key]
+  auction_id uuid [not null]
+  bidder_id uuid [not null]
+  amount decimal
+  created_at timestamp
+}
+
+Table payments {
+  id uuid [primary key]
+  auction_id uuid [not null]
+  winner_id uuid [not null]
+  stripe_payment_id varchar
+  amount decimal
+  status varchar
+  created_at timestamp
+}
+
+Table watchlists {
+  id uuid [primary key]
+  user_id uuid [not null]
+  auction_id uuid [not null]
+}
+
+Table notifications {
+  id uuid [primary key]
+  user_id uuid [not null]
+  message varchar
+  read boolean
+  created_at timestamp
+}
+
+Table auction_settings {
+  id uuid [primary key]
+  auction_id uuid [not null, unique]
+  min_bid_increment decimal
+  reserve_price decimal
+  buy_now_price decimal
+  auto_extend_enabled boolean
+  auto_extend_minutes integer
+  max_bids_per_user integer
+  require_verified_bidder boolean
+  custom_rules text
+}
+
+Ref auction_seller: auctions.seller_id ?> users.id // many-to-one
+Ref verification_token_user: verification_tokens.user_id ?> users.id // many-to-one, cascade delete
+Ref auction_category: auctions.category_id ?> categories.id // many-to-one
+Ref auction_image: auction_images.auction_id ?> auctions.id // many-to-one
+Ref bid_auction: bids.auction_id ?> auctions.id // many-to-one
+Ref bid_bidder: bids.bidder_id ?> users.id // many-to-one
+Ref payment_auction: payments.auction_id - auctions.id // one-to-one
+Ref payment_winner: payments.winner_id ?> users.id // many-to-one
+Ref watchlist_user: watchlists.user_id ?> users.id // many-to-one
+Ref watchlist_auction: watchlists.auction_id ?> auctions.id // many-to-one
+Ref notification_user: notifications.user_id ?> users.id // many-to-one
+Ref auction_settings_auction: auction_settings.auction_id - auctions.id // one-to-one
+// Note: event_logs.entity_id is polymorphic (points to auctions, payments,
+// notifications, or users depending on entity_type) — intentionally left
+// without a DB-level FK constraint or a diagram Ref for that reason.
+
+Table event_logs {
+  id uuid [primary key]
+  event_type varchar [note: 'auction.created/closed/sold/unsold, notification.sent, payment.succeeded/failed, auth.signup/login/logout, auth.password_reset_requested/completed, auth.password_changed, user.account_updated']
+  entity_type varchar [note: 'auction / payment / notification / user only — no bid events']
+  entity_id uuid [not null]
+  metadata jsonb
+  created_at timestamp
+}

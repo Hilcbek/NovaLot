@@ -18,7 +18,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useAuthStore, useLogout } from "@/hooks";
+import { useAuthStore, useLogout, useMobileMenuStore } from "@/hooks";
 import { cn } from "@/lib/utils";
 import {
   Bell,
@@ -31,8 +31,8 @@ import {
   UserPlus,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
 import { ModeToggle } from "./mode-toggler";
+
 const CATEGORIES = [
   "Fine Watches",
   "Fine Art",
@@ -63,7 +63,9 @@ export function SiteHeader({
   activePath = "/how-it-works",
   hasUnreadNotifications = true,
 }: SiteHeaderProps) {
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const isMobileOpen = useMobileMenuStore((s) => s.isOpen);
+  const closeMobileMenu = useMobileMenuStore((s) => s.close);
+  const toggleMobileMenu = useMobileMenuStore((s) => s.toggle);
 
   const authUser = useAuthStore((s) => s.user);
   const logoutMutation = useLogout();
@@ -158,7 +160,7 @@ export function SiteHeader({
               <button
                 type="button"
                 aria-label="Notifications"
-                className="relative hidden rounded-sm p-2 text-foreground/70 hover:bg-muted sm:flex"
+                className="relative hidden rounded-sm p-2 text-foreground/70 hover:bg-muted lg:flex"
               >
                 <Bell className="h-5 w-5" />
                 {hasUnreadNotifications && (
@@ -167,7 +169,7 @@ export function SiteHeader({
               </button>
 
               <DropdownMenu>
-                <DropdownMenuTrigger className="hidden items-center gap-1 outline-none sm:flex">
+                <DropdownMenuTrigger className="hidden items-center gap-1 outline-none lg:flex">
                   <Avatar className="h-9 w-9">
                     <AvatarImage src={user.avatarUrl} alt={user.name} />
                     <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
@@ -195,7 +197,7 @@ export function SiteHeader({
               </DropdownMenu>
             </>
           ) : (
-            <div className="hidden items-center gap-2 sm:flex">
+            <div className="hidden items-center gap-2 lg:flex">
               <Button
                 variant="outline"
                 size="sm"
@@ -216,12 +218,15 @@ export function SiteHeader({
             </div>
           )}
 
-          <div className="hidden sm:block">
+          <div>
             <ModeToggle />
           </div>
 
           {/* Hamburger — everything below lg, plus auth buttons below sm */}
-          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+          <Sheet
+            open={isMobileOpen}
+            onOpenChange={(open) => (open ? toggleMobileMenu() : closeMobileMenu())}
+          >
             <SheetTrigger asChild>
               <button
                 type="button"
@@ -232,7 +237,10 @@ export function SiteHeader({
               </button>
             </SheetTrigger>
 
-            <SheetContent side="right" className="w-[300px] p-0 sm:w-[360px]">
+            <SheetContent
+              side="right"
+              className="w-[300px] gap-0 p-0 sm:w-[360px]"
+            >
               <SheetHeader className="border-b border-border px-5 py-4">
                 <SheetTitle className="flex items-center gap-2 font-serif text-xl text-brand-accent">
                   <Gavel className="h-5 w-5" strokeWidth={2} />
@@ -240,7 +248,12 @@ export function SiteHeader({
                 </SheetTitle>
               </SheetHeader>
 
-              <div className="flex flex-col gap-6 px-5 py-5">
+              <div className="flex items-center justify-between border-b border-border px-5 py-3">
+                <span className="text-sm text-muted-foreground">Theme</span>
+                <ModeToggle />
+              </div>
+
+              <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-5 py-5">
                 {/* Search */}
                 <div className="relative">
                   <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -253,7 +266,7 @@ export function SiteHeader({
                     <Link
                       key={link.href}
                       href={link.href}
-                      onClick={() => setMobileOpen(false)}
+                      onClick={closeMobileMenu}
                       className={cn(
                         "rounded-sm px-2 py-2.5 text-sm font-medium text-foreground/80 hover:bg-muted",
                         activePath === link.href && "text-brand-accent",
@@ -273,7 +286,7 @@ export function SiteHeader({
                     <Link
                       key={category}
                       href={`/categories/${category.toLowerCase().replace(/\s+/g, "-")}`}
-                      onClick={() => setMobileOpen(false)}
+                      onClick={closeMobileMenu}
                       className="rounded-sm px-2 py-2 text-sm text-foreground/80 hover:bg-muted"
                     >
                       {category}
@@ -303,16 +316,13 @@ export function SiteHeader({
                   {user ? (
                     <>
                       <Button asChild className="w-full">
-                        <Link
-                          href="/auctions/create"
-                          onClick={() => setMobileOpen(false)}
-                        >
+                        <Link href="/auctions/create" onClick={closeMobileMenu}>
                           Create Auction
                         </Link>
                       </Button>
                       <Link
                         href="/account"
-                        onClick={() => setMobileOpen(false)}
+                        onClick={closeMobileMenu}
                         className="flex items-center gap-3 rounded-sm px-2 py-2 text-sm hover:bg-muted"
                       >
                         <Avatar className="h-8 w-8">
@@ -323,14 +333,14 @@ export function SiteHeader({
                       </Link>
                       <Link
                         href="/watchlist"
-                        onClick={() => setMobileOpen(false)}
+                        onClick={closeMobileMenu}
                         className="rounded-sm px-2 py-2 text-sm hover:bg-muted"
                       >
                         Watchlist
                       </Link>
                       <Link
                         href="/bids"
-                        onClick={() => setMobileOpen(false)}
+                        onClick={closeMobileMenu}
                         className="rounded-sm px-2 py-2 text-sm hover:bg-muted"
                       >
                         My bids
@@ -338,7 +348,7 @@ export function SiteHeader({
                       <button
                         type="button"
                         onClick={() => {
-                          setMobileOpen(false);
+                          closeMobileMenu();
                           logoutMutation.mutate();
                         }}
                         disabled={logoutMutation.isPending}
@@ -349,24 +359,14 @@ export function SiteHeader({
                     </>
                   ) : (
                     <>
-                      <Button
-                        variant="outline"
-                        asChild
-                        className="w-full gap-1.5"
-                      >
-                        <Link
-                          href="/sign-in"
-                          onClick={() => setMobileOpen(false)}
-                        >
+                      <Button variant="outline" asChild className="w-full gap-1.5">
+                        <Link href="/sign-in" onClick={closeMobileMenu}>
                           <LogIn className="h-4 w-4" />
                           Sign in
                         </Link>
                       </Button>
                       <Button asChild className="w-full gap-1.5">
-                        <Link
-                          href="/sign-up"
-                          onClick={() => setMobileOpen(false)}
-                        >
+                        <Link href="/sign-up" onClick={closeMobileMenu}>
                           <UserPlus className="h-4 w-4" />
                           Sign up
                         </Link>
@@ -375,10 +375,6 @@ export function SiteHeader({
                   )}
                 </div>
 
-                <div className="flex items-center justify-between border-t border-border pt-5">
-                  <span className="text-sm text-muted-foreground">Theme</span>
-                  <ModeToggle />
-                </div>
               </div>
             </SheetContent>
           </Sheet>

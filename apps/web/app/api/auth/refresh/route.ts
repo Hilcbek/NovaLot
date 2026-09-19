@@ -7,12 +7,10 @@ import {
   signRefreshToken,
   verifyRefreshToken,
 } from "@/server";
+import { REFRESH_COOKIE_NAME, REFRESH_TTL_SECONDS } from "@novalot/shared/constants";
 import { users } from "@novalot/shared/db/schema";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
-
-const REFRESH_COOKIE_NAME = "refreshToken";
-const REFRESH_TTL_SECONDS = 60 * 60 * 24 * 30; // 30 days — matches REFRESH_TOKEN_EXPIRY
 
 export async function POST(req: NextRequest) {
   const refreshToken = req.cookies.get(REFRESH_COOKIE_NAME)?.value;

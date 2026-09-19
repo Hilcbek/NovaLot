@@ -1,6 +1,7 @@
 
 import { createVerificationToken, db, enforceRateLimit, hashPassword, sendEmail } from "@/server";
 import { signupSchema } from "@novalot/shared/auth-validation";
+import { GENERIC_SIGNUP_MESSAGE } from "@novalot/shared/constants";
 import { users } from "@novalot/shared/db/schema";
 import { RATE_LIMITS } from "@novalot/shared/rate-limit";
 import { validate } from "@novalot/shared/validation";
@@ -8,8 +9,6 @@ import { eq } from "drizzle-orm";
 import httpStatus from "http-status";
 import { NextRequest, NextResponse } from "next/server";
 
-const GENERIC_SIGNUP_MESSAGE =
-  "If that email isn't already registered, check your inbox to verify your account.";
 
 export async function POST(req: NextRequest) {
   const limited = await enforceRateLimit(

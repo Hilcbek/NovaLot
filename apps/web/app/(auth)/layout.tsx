@@ -202,7 +202,7 @@ function AuctionPreviewCard({ item }: { item: AuctionItem }) {
       <div className="mt-3">
         <p className="text-xs text-muted-foreground">Current highest bid</p>
         <p
-          className="font-serif text-2xl"
+          className="font-sans text-2xl"
           style={{ color: "var(--brand-gold)" }}
         >
           {item.currentBid}

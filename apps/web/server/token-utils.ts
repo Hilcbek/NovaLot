@@ -1,9 +1,32 @@
-// apps/web/server/password-reset.ts
+import {
+  generateVerificationToken,
+  hashVerificationToken,
+} from "@novalot/shared/auth";
+import { tokenTypeEnum, verificationTokens } from "@novalot/shared/db/schema";
+import { and, eq } from "drizzle-orm";
+
 import "server-only";
 import { db } from "./db";
-import { users, verificationTokens } from "@novalot/shared/db/schema";
-import { hashVerificationToken } from "@novalot/shared/auth"; // same hasher used to create tokens
-import { and, eq } from "drizzle-orm";
+
+const EXPIRY_HOURS = 24;
+
+type TokenType = (typeof tokenTypeEnum.enumValues)[number];
+
+export async function createVerificationToken(input: {
+  userId: string;
+  type: TokenType;
+}): Promise<string> {
+  const { rawToken, tokenHash } = generateVerificationToken();
+
+  await db.insert(verificationTokens).values({
+    userId: input.userId,
+    tokenHash,
+    type: input.type,
+    expiresAt: new Date(Date.now() + EXPIRY_HOURS * 60 * 60 * 1000),
+  });
+
+  return rawToken;
+}
 
 interface ConsumeResult {
   success: boolean;
@@ -34,7 +57,9 @@ export async function consumePasswordResetToken(
 
   if (row.expiresAt && new Date(row.expiresAt) < new Date()) {
     // Expired — clean it up while we're here, then reject.
-    await db.delete(verificationTokens).where(eq(verificationTokens.id, row.id));
+    await db
+      .delete(verificationTokens)
+      .where(eq(verificationTokens.id, row.id));
     return { success: false };
   }
 

@@ -1,0 +1,124 @@
+erDiagram
+    USER ||--o{ AUCTION : "sells"
+    USER ||--o{ BID : "places"
+    USER ||--o{ PAYMENT : "wins"
+    USER ||--o{ WATCHLIST : "saves"
+    USER ||--o{ NOTIFICATION : "receives"
+    USER ||--o{ VERIFICATIONTOKEN : "requests"
+
+    CATEGORY ||--o{ AUCTION : "categorizes"
+
+    AUCTION ||--o{ BID : "receives"
+    AUCTION ||--o{ AUCTIONIMAGE : "has"
+    AUCTION ||--o| PAYMENT : "settled by"
+    AUCTION ||--o{ WATCHLIST : "saved in"
+    AUCTION ||--o| AUCTIONSETTINGS : "configured by"
+    AUCTION ||--o{ EVENTLOG : "logged for"
+    PAYMENT ||--o{ EVENTLOG : "logged for"
+    NOTIFICATION ||--o{ EVENTLOG : "logged for"
+
+    USER {
+        uuid id PK
+        string name
+        string email
+        string password_hash
+        string role
+        boolean email_verified
+        string avatar_url
+        timestamp created_at
+    }
+
+    VERIFICATIONTOKEN {
+        uuid id PK
+        uuid user_id FK
+        string type "password_reset / email_verification / email_change"
+        text token_hash "sha256 of raw token, never stored raw"
+        string identifier "e.g. new email for email_change"
+        jsonb metadata
+        timestamp expires_at
+        timestamp used_at "null = still valid"
+        timestamp created_at
+        string ip_address
+        text user_agent
+    }
+
+    CATEGORY {
+        uuid id PK
+        string name
+        string slug
+    }
+
+    AUCTION {
+        uuid id PK
+        uuid seller_id FK
+        uuid category_id FK
+        string title
+        text description
+        decimal starting_price
+        decimal current_highest_bid
+        timestamp start_time
+        timestamp end_time
+        string status
+        timestamp created_at
+    }
+
+    AUCTIONIMAGE {
+        uuid id PK
+        uuid auction_id FK
+        string url
+        int order
+    }
+
+    BID {
+        uuid id PK
+        uuid auction_id FK
+        uuid bidder_id FK
+        decimal amount
+        timestamp created_at
+    }
+
+    PAYMENT {
+        uuid id PK
+        uuid auction_id FK
+        uuid winner_id FK
+        string stripe_payment_id
+        decimal amount
+        string status
+        timestamp created_at
+    }
+
+    WATCHLIST {
+        uuid id PK
+        uuid user_id FK
+        uuid auction_id FK
+    }
+
+    NOTIFICATION {
+        uuid id PK
+        uuid user_id FK
+        string message
+        boolean read
+        timestamp created_at
+    }
+
+    EVENTLOG {
+        uuid id PK
+        string event_type "auction.*, notification.sent, payment.*, auth.signup/login/logout, auth.password_*, user.account_updated"
+        string entity_type "auction / payment / notification / user"
+        uuid entity_id
+        jsonb metadata
+        timestamp created_at
+    }
+
+    AUCTIONSETTINGS {
+        uuid id PK
+        uuid auction_id FK
+        decimal min_bid_increment
+        decimal reserve_price
+        decimal buy_now_price
+        boolean auto_extend_enabled
+        int auto_extend_minutes
+        int max_bids_per_user
+        boolean require_verified_bidder
+        text custom_rules
+    }

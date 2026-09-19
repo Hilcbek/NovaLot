@@ -1,8 +1,8 @@
 // apps/web/app/api/auth/logout/route.ts
 import { logger, redis, verifyRefreshToken } from "@/server";
+import { REFRESH_COOKIE_NAME } from "@novalot/shared/constants";
 import { NextRequest, NextResponse } from "next/server";
 
-const REFRESH_COOKIE_NAME = "refreshToken";
 
 export async function POST(req: NextRequest) {
   const refreshToken = req.cookies.get(REFRESH_COOKIE_NAME)?.value;

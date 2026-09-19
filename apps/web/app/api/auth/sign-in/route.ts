@@ -8,14 +8,12 @@ import {
   verifyPassword,
 } from "@/server";
 import { loginSchema } from "@novalot/shared/auth-validation";
+import { REFRESH_COOKIE_NAME, REFRESH_TTL_SECONDS } from '@novalot/shared/constants';
 import { users } from "@novalot/shared/db/schema";
 import { RATE_LIMITS } from "@novalot/shared/rate-limit";
 import { validate } from "@novalot/shared/validation";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
-
-const REFRESH_COOKIE_NAME = "refreshToken";
-const REFRESH_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days — match your refresh token expiry
 
 export async function POST(req: NextRequest) {
   const limited = await enforceRateLimit(

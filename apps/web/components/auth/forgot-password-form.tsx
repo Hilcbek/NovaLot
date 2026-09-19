@@ -6,8 +6,9 @@ import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field
 import { Input } from "@/components/ui/input";
 import { useForgotPasswordMutation } from "@/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { forgotPasswordSchema } from "@novalot/shared/auth-validation";
+import { requestPasswordResetSchema } from "@novalot/shared/auth-validation";
 import { isAxiosError } from "axios";
+import Link from "next/link";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
@@ -23,7 +24,7 @@ export function ForgotPasswordForm() {
     setError,
     formState: { errors },
   } = useForm<FormValues>({
-    resolver: zodResolver(forgotPasswordSchema),
+    resolver: zodResolver(requestPasswordResetSchema),
     defaultValues: { email: "" },
   });
 
@@ -41,40 +42,65 @@ export function ForgotPasswordForm() {
     });
   }
 
-  if (submitted) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        If that email is registered, you&apos;ll receive a password reset link
-        shortly. Check your inbox.
-      </p>
-    );
-  }
-
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <FieldGroup>
-        <Controller
-          control={control}
-          name="email"
-          render={({ field }) => (
-            <Field data-invalid={!!errors.email}>
-              <FieldLabel htmlFor="email">Email</FieldLabel>
-              <Input id="email" type="email" placeholder="you@example.com" {...field} />
-              {errors.email && <FieldError>{errors.email.message}</FieldError>}
-            </Field>
-          )}
-        />
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-2">
+        <p className="text-sm font-medium text-foreground">Reset Password</p>
+        <h1 className="font-serif text-4xl text-brand-accent">
+          Forgot your password?
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Enter the email on your account and we&apos;ll send you a link to
+          reset your password.
+        </p>
+      </div>
 
-        {errors.root && (
-          <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-            {errors.root.message}
-          </p>
-        )}
+      {submitted ? (
+        <p className="rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
+          If that email is registered, you&apos;ll receive a password reset
+          link shortly. Check your inbox.
+        </p>
+      ) : (
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <FieldGroup>
+            <Controller
+              control={control}
+              name="email"
+              render={({ field }) => (
+                <Field data-invalid={!!errors.email}>
+                  <FieldLabel htmlFor="email">Email</FieldLabel>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    {...field}
+                  />
+                  {errors.email && (
+                    <FieldError>{errors.email.message}</FieldError>
+                  )}
+                </Field>
+              )}
+            />
 
-        <Button type="submit" disabled={isPending} className="w-full">
-          {isPending ? "Sending..." : "Send reset link"}
-        </Button>
-      </FieldGroup>
-    </form>
+            {errors.root && (
+              <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                {errors.root.message}
+              </p>
+            )}
+
+            <Button type="submit" disabled={isPending} className="w-full">
+              {isPending ? "Sending..." : "Send reset link"}
+            </Button>
+          </FieldGroup>
+        </form>
+      )}
+
+      <p className="text-center text-sm text-muted-foreground">
+        Remember your password?{" "}
+        <Link href="/sign-in" className="font-medium text-foreground underline">
+          Log in
+        </Link>
+      </p>
+    </div>
   );
 }
