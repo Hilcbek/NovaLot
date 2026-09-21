@@ -45,3 +45,6 @@ export function canCancelAuction(auction: Auction, user: PermissionUser): boolea
   // effectiveStatus === "active"
   return isAdmin;
 }
+export function canPublishAuction(auction: Auction, user: PermissionUser): boolean {
+  return auction.sellerId === user.id && auction.status === "draft";
+}

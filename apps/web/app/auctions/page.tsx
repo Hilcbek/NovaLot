@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAuthStore, useCancelAuctionMutation, useMyAuctions } from "@/hooks";
 import { canCancelAuction } from "@novalot/shared/auction";
+import type { AuctionListItem } from "@/api/auctions.api";
 import Link from "next/link";
 const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   draft: "outline",
@@ -33,7 +34,7 @@ export default function MyAuctionsPage() {
       </div>
 
       <div className="flex flex-col gap-3">
-        {auctions?.map((auction: any) => {
+        {auctions?.map((auction: AuctionListItem) => {
           const canCancel = user && canCancelAuction(auction, user);
 
           return (
@@ -82,7 +83,7 @@ export default function MyAuctionsPage() {
 
         {auctions?.length === 0 && (
           <p className="text-sm text-muted-foreground">
-            You haven't listed any auctions yet.
+            You haven&apos;t listed any auctions yet.
           </p>
         )}
       </div>

@@ -19,6 +19,7 @@ import {
 import {
   auctionImages,
   auctions,
+  auctionSettings,
   categories,
   type Auction,
 } from "@novalot/shared/db/schema";
@@ -129,6 +130,7 @@ export async function getAuctionBySlug(slug: string) {
         },
       },
       images: true,
+      settings: true,
     },
   });
 
@@ -183,7 +185,7 @@ export async function createAuction(
         reservePrice: input.reservePrice?.toString(),
         buyNowPrice: input.buyNowPrice?.toString(),
         bidIncrement: input.bidIncrement.toString(),
-        location: input.location,
+        
         condition: input.condition,
         status: "scheduled", // immediate publish, per your earlier decision — no draft/approval step yet
         startTime: input.startTime,
@@ -201,6 +203,16 @@ export async function createAuction(
         isPrimary: img.isPrimary,
       })),
     );
+
+    // Create auction_settings record
+    await tx.insert(auctionSettings).values({
+      auctionId: auction.id,
+      autoExtendEnabled: input.autoExtendEnabled ?? false,
+      autoExtendMinutes: input.autoExtendMinutes,
+      maxBidsPerUser: input.maxBidsPerUser,
+      requireVerifiedBidder: input.requireVerifiedBidder ?? false,
+      customRules: input.customRules,
+    });
 
     return auction;
   });
@@ -264,7 +276,7 @@ export async function updateAuction(
         ...(input.bidIncrement !== undefined && {
           bidIncrement: input.bidIncrement.toString(),
         }),
-        ...(input.location !== undefined && { location: input.location }),
+        
         ...(input.condition !== undefined && { condition: input.condition }),
         ...(input.startTime !== undefined && { startTime: input.startTime }),
         ...(input.endTime !== undefined && { endTime: input.endTime }),
@@ -290,6 +302,21 @@ export async function updateAuction(
       );
     }
 
+    // Update auction_settings if any settings fields are provided
+    const settingsUpdate: Record<string, unknown> = {};
+    if (input.autoExtendEnabled !== undefined) settingsUpdate.autoExtendEnabled = input.autoExtendEnabled;
+    if (input.autoExtendMinutes !== undefined) settingsUpdate.autoExtendMinutes = input.autoExtendMinutes;
+    if (input.maxBidsPerUser !== undefined) settingsUpdate.maxBidsPerUser = input.maxBidsPerUser;
+    if (input.requireVerifiedBidder !== undefined) settingsUpdate.requireVerifiedBidder = input.requireVerifiedBidder;
+    if (input.customRules !== undefined) settingsUpdate.customRules = input.customRules;
+
+    if (Object.keys(settingsUpdate).length > 0) {
+      await tx
+        .update(auctionSettings)
+        .set(settingsUpdate)
+        .where(eq(auctionSettings.auctionId, auctionId));
+    }
+
     return row;
   });
 
@@ -301,11 +328,11 @@ type DeleteOutcome =
   | { error: "not-found" | "forbidden" | "not-draft" };
 
 export async function deleteAuctionDraft(
-  auctionId: string,
+  auctionSlug: string,
   user: AuthContext,
 ): Promise<DeleteOutcome> {
   const existing = await db.query.auctions.findFirst({
-    where: eq(auctions.id, auctionId),
+    where: eq(auctions.slug, auctionSlug),
   });
   if (!existing) return { error: "not-found" };
   if (existing.sellerId !== user.id) return { error: "forbidden" };
@@ -315,7 +342,8 @@ export async function deleteAuctionDraft(
   }
 
   // auction_images has onDelete: "cascade" — no need to delete images manually.
-  await db.delete(auctions).where(eq(auctions.id, auctionId));
+  // auction_settings also has onDelete: "cascade" — no need to delete settings manually.
+  await db.delete(auctions).where(eq(auctions.slug, auctionSlug));
   return { success: true };
 }
 
@@ -352,6 +380,7 @@ export async function getPublicAuctionBySlug(slug: string) {
       images: true,
       category: true,
       seller: { columns: { id: true, firstName: true, lastName: true } },
+      settings: true,
     },
   });
 

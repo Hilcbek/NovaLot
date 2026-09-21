@@ -1,11 +1,11 @@
 // features/auctions/components/auction-card.tsx
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
+import type { AuctionListItem } from "@/api/auctions.api";
 import { useCountdown } from "@/hooks";
 import { formatPrice } from "@/lib/format";
-import type { AuctionListItem } from "@/api/auctions.api";
+import Image from "next/image";
+import Link from "next/link";
 
 export function AuctionCard({ auction }: { auction: AuctionListItem }) {
   const { ended, label } = useCountdown(auction.endTime);
@@ -18,6 +18,7 @@ export function AuctionCard({ auction }: { auction: AuctionListItem }) {
       <div className="relative aspect-square overflow-hidden bg-muted">
         {auction.primaryImage ? (
           <Image
+            loading="lazy"
             src={auction.primaryImage.thumbnailUrl ?? auction.primaryImage.url}
             alt={auction.title}
             fill

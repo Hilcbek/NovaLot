@@ -14,6 +14,7 @@ import {
 import { Controller, useFormContext } from "react-hook-form";
 import { AuctionFormValues } from "../form-types";
 import { useCategories } from "@/hooks";
+import type { CategoryNode } from "@novalot/shared/category";
 
 const CONDITIONS = [
   "New",
@@ -28,12 +29,12 @@ const CONDITIONS = [
 // Flattens the category tree into a flat list with a `depth` field, so
 // subcategories render indented under their parent in the Select.
 function flattenCategories(
-  nodes: { id: string; name: string; children?: any[] }[],
+  nodes: CategoryNode[],
   depth = 0,
 ): { id: string; name: string; depth: number }[] {
   return nodes.flatMap((node) => [
     { id: node.id, name: node.name, depth },
-    ...flattenCategories(node.children ?? [], depth + 1),
+    ...flattenCategories(node.children, depth + 1),
   ]);
 }
 
@@ -131,18 +132,6 @@ export function DetailsStep() {
           )}
         />
       </div>
-
-      <Controller
-        control={control}
-        name="location"
-        render={({ field }) => (
-          <Field data-invalid={!!errors.location}>
-            <FieldLabel htmlFor="location">Location</FieldLabel>
-            <Input id="location" placeholder="New York, NY" {...field} />
-            {errors.location && <FieldError>{errors.location.message}</FieldError>}
-          </Field>
-        )}
-      />
     </FieldGroup>
   );
 }

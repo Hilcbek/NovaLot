@@ -1,4 +1,3 @@
-// components/mode-toggle.tsx
 "use client";
 
 import * as React from "react";
@@ -7,16 +6,21 @@ import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
+const emptySubscribe = () => () => {};
+
 export function ModeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = React.useState(false);
-
-  React.useEffect(() => setMounted(true), []);
+  // Returns false on the server / first client render (before hydration),
+  // true after — same effect as the old mounted-state trick, no setState-in-effect.
+  const mounted = React.useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
 
   function toggleTheme() {
     const next = resolvedTheme === "dark" ? "light" : "dark";
 
-    // Fall back to an instant switch on browsers without the View Transitions API
     if (!document.startViewTransition) {
       setTheme(next);
       return;

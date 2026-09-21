@@ -82,7 +82,7 @@ export function AuctionDetailView({ slug }: { slug: string }) {
                         : "border-transparent"
                     }`}
                   >
-                    <Image src={img.url} alt="" fill className="object-cover" />
+                    <Image loading="lazy" src={img.url} alt="" fill className="object-cover" />
                   </button>
                 ),
               )}
@@ -93,7 +93,6 @@ export function AuctionDetailView({ slug }: { slug: string }) {
         <div>
           <h1 className="font-serif text-3xl">{auction.title}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {auction.location}
           </p>
 
           <div className="mt-4 rounded-lg border p-4">

@@ -51,9 +51,13 @@ Table auctions {
   description text
   starting_price decimal
   current_highest_bid decimal
+  reserve_price decimal [note: 'Optional hidden minimum price']
+  buy_now_price decimal [note: 'Optional instant purchase price']
+  bid_increment decimal [note: 'Minimum amount each bid must exceed current highest']
+  condition varchar
   start_time timestamp
   end_time timestamp
-  status varchar [note: 'draft / live / ended / sold']
+  status varchar [note: 'draft / scheduled / active / ended / cancelled']
   created_at timestamp
 }
 
@@ -98,10 +102,7 @@ Table notifications {
 
 Table auction_settings {
   id uuid [primary key]
-  auction_id uuid [not null, unique]
-  min_bid_increment decimal
-  reserve_price decimal
-  buy_now_price decimal
+  auction_id uuid [not null, unique, note: 'One-to-one with auctions']
   auto_extend_enabled boolean
   auto_extend_minutes integer
   max_bids_per_user integer

@@ -1,9 +1,8 @@
 // features/auctions/components/steps/images-step.tsx
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { FieldError } from "@/components/ui/field";
-import { uploadImageToImageKit, deleteImageFromImageKit } from "@/lib/imagekit-upload";
+import { deleteImageFromImageKit, uploadImageToImageKit } from "@/lib";
 import { Star, Upload, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
@@ -123,7 +122,9 @@ export function ImagesStep() {
             className="flex aspect-square flex-col items-center justify-center gap-1 rounded-md border border-dashed border-border text-muted-foreground hover:bg-muted disabled:opacity-50"
           >
             <Upload className="h-5 w-5" />
-            <span className="text-xs">{uploading ? "Uploading..." : "Add"}</span>
+            <span className="text-xs">
+              {uploading ? "Uploading..." : "Add"}
+            </span>
           </button>
         )}
       </div>

@@ -1,12 +1,17 @@
-
 import { httpClient } from "@/lib";
-import { ForgotPasswordInput, LoginInput, ResetPasswordInput, SignupInput } from "@novalot/shared/auth-validation";
+import {
+  ForgotPasswordInput,
+  LoginInput,
+  ResetPasswordInput,
+  SignupInput,
+} from "@novalot/shared/auth-validation";
 
 export interface AuthUser {
   id: string;
   firstName: string;
   lastName: string;
   avatarUrl: string;
+  role: "user" | "admin";
 }
 
 export interface AuthResponse {
@@ -35,12 +40,16 @@ export async function logoutUser(): Promise<void> {
   await httpClient.post("/auth/logout");
 }
 
-export async function forgotPassword(data: ForgotPasswordInput): Promise<{ message: string }> {
+export async function forgotPassword(
+  data: ForgotPasswordInput,
+): Promise<{ message: string }> {
   const { data: res } = await httpClient.post("/auth/forgot-password", data);
   return res;
 }
 
-export async function resetPassword(data: ResetPasswordInput): Promise<{ message: string }> {
+export async function resetPassword(
+  data: ResetPasswordInput,
+): Promise<{ message: string }> {
   const { data: res } = await httpClient.post("/auth/reset-password", data);
   return res;
 }

@@ -56,6 +56,10 @@ erDiagram
         text description
         decimal starting_price
         decimal current_highest_bid
+        decimal reserve_price "optional"
+        decimal buy_now_price "optional"
+        decimal bid_increment
+        string condition
         timestamp start_time
         timestamp end_time
         string status
@@ -112,10 +116,7 @@ erDiagram
 
     AUCTIONSETTINGS {
         uuid id PK
-        uuid auction_id FK
-        decimal min_bid_increment
-        decimal reserve_price
-        decimal buy_now_price
+        uuid auction_id FK "unique, one-to-one"
         boolean auto_extend_enabled
         int auto_extend_minutes
         int max_bids_per_user

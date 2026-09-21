@@ -8,9 +8,21 @@ export interface UploadedImage {
   thumbnailUrl: string;
 }
 
-export async function uploadImageToImageKit(
-  file: File,
-): Promise<UploadedImage> {
+// imagekit-javascript ships no TypeScript types, so this is hand-written
+// from ImageKit's documented upload response shape — only the fields this
+// file actually reads.
+interface ImageKitUploadResult {
+  fileId: string;
+  url: string;
+  thumbnailUrl: string;
+  name: string;
+  filePath: string;
+  height?: number;
+  width?: number;
+  size: number;
+}
+
+export async function uploadImageToImageKit(file: File): Promise<UploadedImage> {
   const { data: auth } = await httpClient.get("/imagekit/auth");
 
   const imagekit = new ImageKit({
@@ -28,7 +40,7 @@ export async function uploadImageToImageKit(
         signature: auth.signature,
         expire: auth.expire,
       },
-      (err: Error | null, result: any | null) => {
+      (err: Error | null, result: ImageKitUploadResult | null) => {
         if (err || !result) return reject(err ?? new Error("Upload failed"));
         resolve({
           fileId: result.fileId,

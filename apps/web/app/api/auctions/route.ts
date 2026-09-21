@@ -1,17 +1,19 @@
 // apps/web/app/api/auctions/route.ts
 import { createAuction, getAuthenticatedUser, listAuctions } from "@/server";
-import { validate } from "@novalot/shared/validation";
-import { z } from "zod";
-import { NextRequest, NextResponse } from "next/server";
 import { createAuctionSchema } from "@novalot/shared/auction-validation";
+import { validate } from "@novalot/shared/validation";
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 
 const listAuctionsQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(50).default(20),
-  categoryId: z.string().uuid().optional(),
+  categoryId: z.uuid().optional(),
   status: z.enum(["scheduled", "active", "ended", "cancelled"]).optional(),
   search: z.string().max(200).optional(),
-  sort: z.enum(["ending-soon", "newest", "price-asc", "price-desc"]).default("newest"),
+  sort: z
+    .enum(["ending-soon", "newest", "price-asc", "price-desc"])
+    .default("newest"),
 });
 
 export async function GET(req: NextRequest) {
@@ -23,6 +25,8 @@ export async function GET(req: NextRequest) {
   }
 
   const response = await listAuctions(result.data);
+
+
   return NextResponse.json(response);
 }
 export async function POST(req: NextRequest) {

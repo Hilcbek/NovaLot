@@ -16,7 +16,8 @@
     "./category-validation": "./src/validation/category.validation.ts",
     "./category": "./src/category/index.ts",
     "./auction-validation": "./src/validation/auction.validation.ts",
-    "./auction": "./src/auction/index.ts"
+    "./auction": "./src/auction/index.ts",
+    "./seller-settings-validation": "./src/validation/seller-settings.validation.ts"
   },
   "scripts": {
     "db:generate": "drizzle-kit generate --config=drizzle.config.ts",

@@ -1,6 +1,5 @@
 // apps/web/app/api/auth/reset-password/route.ts
-import { db, enforceRateLimit, hashPassword, logger, redis } from "@/server";
-import { consumePasswordResetToken } from "@/server/token-utils";
+import { consumePasswordResetToken, db, enforceRateLimit, hashPassword, logger, redis } from "@/server";
 import { resetPasswordSchema } from "@novalot/shared/auth-validation";
 import { users } from "@novalot/shared/db/schema";
 import { RATE_LIMITS } from "@novalot/shared/rate-limit";

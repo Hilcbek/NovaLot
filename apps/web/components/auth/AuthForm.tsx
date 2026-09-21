@@ -1,4 +1,3 @@
-// features/auth/components/auth-form.tsx
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -13,7 +12,12 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useAuthMutation } from "@/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema, signupSchema } from "@novalot/shared/auth-validation";
+import {
+  loginSchema,
+  signupSchema,
+  type LoginInput,
+  type SignupInput,
+} from "@novalot/shared/auth-validation";
 import { isAxiosError } from "axios";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
@@ -101,7 +105,23 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
   });
 
   function onSubmit(values: FormValues) {
-    mutate(values as any, {
+    // The zod resolver for this mode has already validated `values` against
+    // signupSchema or loginSchema before onSubmit ever runs, so the fields
+    // required by whichever schema was active are guaranteed present here —
+    // this branch just gives TypeScript the same narrowing the runtime
+    // validation already enforced, instead of casting past the mismatch.
+    const payload: SignupInput | LoginInput =
+      mode === "sign-up"
+        ? {
+            firstName: values.firstName!,
+            lastName: values.lastName!,
+            email: values.email,
+            password: values.password,
+            confirmPassword: values.confirmPassword!,
+          }
+        : { email: values.email, password: values.password };
+
+    mutate(payload, {
       onError: (error: unknown) => {
         if (isAxiosError(error) && error.response?.data?.errors) {
           const fieldErrors = error.response.data.errors as Record<
@@ -175,15 +195,8 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
             render={({ field }) => (
               <Field data-invalid={!!errors.email}>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  {...field}
-                />
-                {errors.email && (
-                  <FieldError>{errors.email.message}</FieldError>
-                )}
+                <Input id="email" type="email" placeholder="you@example.com" {...field} />
+                {errors.email && <FieldError>{errors.email.message}</FieldError>}
               </Field>
             )}
           />
@@ -226,13 +239,10 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
                 </div>
                 {mode === "sign-up" && (
                   <FieldDescription>
-                    Must be at least 8 characters, include a number and a
-                    letter.
+                    Must be at least 8 characters, include a number and a letter.
                   </FieldDescription>
                 )}
-                {errors.password && (
-                  <FieldError>{errors.password.message}</FieldError>
-                )}
+                {errors.password && <FieldError>{errors.password.message}</FieldError>}
               </Field>
             )}
           />
@@ -243,9 +253,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
               name="confirmPassword"
               render={({ field }) => (
                 <Field data-invalid={!!errors.confirmPassword}>
-                  <FieldLabel htmlFor="confirmPassword">
-                    Confirm password
-                  </FieldLabel>
+                  <FieldLabel htmlFor="confirmPassword">Confirm password</FieldLabel>
                   <div className="relative">
                     <Input
                       id="confirmPassword"

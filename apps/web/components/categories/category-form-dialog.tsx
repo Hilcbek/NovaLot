@@ -8,7 +8,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"; // ← confirm this exists in your shadcn setup
+} from "@/components/ui/dialog";
 import {
   Field,
   FieldDescription,
@@ -23,7 +23,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"; // ← confirm this exists
+} from "@/components/ui/select";
 import { useCreateCategoryMutation, useUpdateCategoryMutation } from "@/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { slugify, type CategoryNode } from "@novalot/shared/category";
@@ -32,11 +32,11 @@ import {
   updateCategorySchema,
   type CreateCategoryInput,
   type UpdateCategoryInput,
-} from "@novalot/shared/category-validation"; // ← still unconfirmed export path
+} from "@novalot/shared/category-validation";
 import type { Category } from "@novalot/shared/db/schema";
 import { isAxiosError } from "axios";
 import { useEffect, useMemo, useState } from "react";
-import { Controller, useForm, type Resolver } from "react-hook-form";
+import { Controller, useForm, useWatch, type Resolver } from "react-hook-form";
 
 interface FlatOption {
   id: string;
@@ -52,10 +52,7 @@ function flattenTree(nodes: CategoryNode[], depth = 0): FlatOption[] {
 }
 
 function getDescendantIds(node: CategoryNode): string[] {
-  return node.children.flatMap((child) => [
-    child.id,
-    ...getDescendantIds(child),
-  ]);
+  return node.children.flatMap((child) => [child.id, ...getDescendantIds(child)]);
 }
 
 function findNode(nodes: CategoryNode[], id: string): CategoryNode | undefined {
@@ -76,36 +73,69 @@ type FormValues = {
   displayOrder: number;
 };
 
+interface CategoryFormDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  tree: CategoryNode[];
+  category?: Category; // undefined = create mode, Category = edit mode
+}
+
 export function CategoryFormDialog({
   open,
   onOpenChange,
   tree,
-  category, // undefined = create mode, Category = edit mode
+  category,
+}: CategoryFormDialogProps) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:min-w-2xl">
+        {/*
+          Rendering the form only while open, keyed by which category (or
+          "new") it's for, means React fully unmounts and remounts it every
+          time the dialog opens — a fresh component instance with fresh
+          initial state (useForm defaultValues, slugTouched) computed once,
+          up front. No effect is needed to "reset" anything on open, because
+          there's nothing stale left over to reset: the previous instance is
+          gone.
+        */}
+        {open && (
+          <CategoryFormContent
+            key={category?.id ?? "new"}
+            tree={tree}
+            category={category}
+            onOpenChange={onOpenChange}
+          />
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function CategoryFormContent({
+  tree,
+  category,
+  onOpenChange,
 }: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   tree: CategoryNode[];
   category?: Category;
+  onOpenChange: (open: boolean) => void;
 }) {
   const isEdit = !!category;
   const { mutate: create, isPending: isCreating } = useCreateCategoryMutation();
   const { mutate: update, isPending: isUpdating } = useUpdateCategoryMutation();
   const isPending = isCreating || isUpdating;
 
+  // No reset effect needed — this whole component remounts fresh per open,
+  // so this initial value is only ever computed once per dialog session.
   const [slugTouched, setSlugTouched] = useState(false);
 
   const {
     control,
     handleSubmit,
-    watch,
     setValue,
     setError,
-    reset,
     formState: { errors },
   } = useForm<FormValues>({
-    // zodResolver can produce a resolver type that is not perfectly compatible with
-    // the expected generic Resolver<FormValues>. Cast to Resolver<FormValues> to
-    // satisfy TypeScript here.
     resolver: zodResolver(
       isEdit ? updateCategorySchema : createCategorySchema,
     ) as unknown as Resolver<FormValues>,
@@ -119,19 +149,7 @@ export function CategoryFormDialog({
     },
   });
 
-  useEffect(() => {
-    reset({
-      name: category?.name ?? "",
-      slug: category?.slug ?? "",
-      parentId: category?.parentId ?? null,
-      description: category?.description ?? "",
-      imageUrl: category?.imageUrl ?? "",
-      displayOrder: category?.displayOrder ?? 0,
-    });
-    setSlugTouched(false);
-  }, [category, open, reset]);
-
-  const name = watch("name");
+  const name = useWatch({ control, name: "name" });
   useEffect(() => {
     if (!slugTouched) {
       setValue("slug", slugify(name || ""));
@@ -181,158 +199,135 @@ export function CategoryFormDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:min-w-2xl">
-        <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit category" : "New category"}</DialogTitle>
-        </DialogHeader>
+    <>
+      <DialogHeader>
+        <DialogTitle>{isEdit ? "Edit category" : "New category"}</DialogTitle>
+      </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <FieldGroup>
-            <Controller
-              control={control}
-              name="name"
-              render={({ field }) => (
-                <Field data-invalid={!!errors.name}>
-                  <FieldLabel htmlFor="name">Name</FieldLabel>
-                  <Input id="name" {...field} />
-                  {errors.name && (
-                    <FieldError>{errors.name.message}</FieldError>
-                  )}
-                </Field>
-              )}
-            />
-
-            <Controller
-              control={control}
-              name="slug"
-              render={({ field }) => (
-                <Field data-invalid={!!errors.slug}>
-                  <FieldLabel htmlFor="slug">Slug</FieldLabel>
-                  <Input
-                    id="slug"
-                    {...field}
-                    onChange={(e) => {
-                      setSlugTouched(true);
-                      field.onChange(e);
-                    }}
-                  />
-                  <FieldDescription>
-                    Auto-generated from the name — edit if you need something
-                    different.
-                  </FieldDescription>
-                  {errors.slug && (
-                    <FieldError>{errors.slug.message}</FieldError>
-                  )}
-                </Field>
-              )}
-            />
-
-            <Controller
-              control={control}
-              name="parentId"
-              render={({ field }) => (
-                <Field data-invalid={!!errors.parentId}>
-                  <FieldLabel htmlFor="parentId">Parent category</FieldLabel>
-                  <Select
-                    value={field.value ?? "none"}
-                    onValueChange={(v) =>
-                      field.onChange(v === "none" ? null : v)
-                    }
-                  >
-                    <SelectTrigger id="parentId">
-                      <SelectValue placeholder="No parent (top-level)" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">
-                        No parent (top-level)
-                      </SelectItem>
-                      {parentOptions.map((opt) => (
-                        <SelectItem key={opt.id} value={opt.id}>
-                          {"—".repeat(opt.depth)} {opt.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.parentId && (
-                    <FieldError>{errors.parentId.message}</FieldError>
-                  )}
-                </Field>
-              )}
-            />
-
-            <Controller
-              control={control}
-              name="description"
-              render={({ field }) => (
-                <Field data-invalid={!!errors.description}>
-                  <FieldLabel htmlFor="description">Description</FieldLabel>
-                  <Input id="description" {...field} />
-                  {errors.description && (
-                    <FieldError>{errors.description.message}</FieldError>
-                  )}
-                </Field>
-              )}
-            />
-
-            <Controller
-              control={control}
-              name="imageUrl"
-              render={({ field }) => (
-                <Field data-invalid={!!errors.imageUrl}>
-                  <FieldLabel htmlFor="imageUrl">Image URL</FieldLabel>
-                  <Input id="imageUrl" {...field} />
-                  {errors.imageUrl && (
-                    <FieldError>{errors.imageUrl.message}</FieldError>
-                  )}
-                </Field>
-              )}
-            />
-
-            <Controller
-              control={control}
-              name="displayOrder"
-              render={({ field }) => (
-                <Field data-invalid={!!errors.displayOrder}>
-                  <FieldLabel htmlFor="displayOrder">Display order</FieldLabel>
-                  <Input
-                    id="displayOrder"
-                    type="number"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
-                  {errors.displayOrder && (
-                    <FieldError>{errors.displayOrder.message}</FieldError>
-                  )}
-                </Field>
-              )}
-            />
-
-            {errors.root && (
-              <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                {errors.root.message}
-              </p>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <FieldGroup>
+          <Controller
+            control={control}
+            name="name"
+            render={({ field }) => (
+              <Field data-invalid={!!errors.name}>
+                <FieldLabel htmlFor="name">Name</FieldLabel>
+                <Input id="name" {...field} />
+                {errors.name && <FieldError>{errors.name.message}</FieldError>}
+              </Field>
             )}
-          </FieldGroup>
+          />
 
-          <DialogFooter className="mt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isPending}>
-              {isPending
-                ? "Saving..."
-                : isEdit
-                  ? "Save changes"
-                  : "Create category"}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+          <Controller
+            control={control}
+            name="slug"
+            render={({ field }) => (
+              <Field data-invalid={!!errors.slug}>
+                <FieldLabel htmlFor="slug">Slug</FieldLabel>
+                <Input
+                  id="slug"
+                  {...field}
+                  onChange={(e) => {
+                    setSlugTouched(true);
+                    field.onChange(e);
+                  }}
+                />
+                <FieldDescription>
+                  Auto-generated from the name — edit if you need something different.
+                </FieldDescription>
+                {errors.slug && <FieldError>{errors.slug.message}</FieldError>}
+              </Field>
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="parentId"
+            render={({ field }) => (
+              <Field data-invalid={!!errors.parentId}>
+                <FieldLabel htmlFor="parentId">Parent category</FieldLabel>
+                <Select
+                  value={field.value ?? "none"}
+                  onValueChange={(v) => field.onChange(v === "none" ? null : v)}
+                >
+                  <SelectTrigger id="parentId">
+                    <SelectValue placeholder="No parent (top-level)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No parent (top-level)</SelectItem>
+                    {parentOptions.map((opt) => (
+                      <SelectItem key={opt.id} value={opt.id}>
+                        {"—".repeat(opt.depth)} {opt.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.parentId && <FieldError>{errors.parentId.message}</FieldError>}
+              </Field>
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="description"
+            render={({ field }) => (
+              <Field data-invalid={!!errors.description}>
+                <FieldLabel htmlFor="description">Description</FieldLabel>
+                <Input id="description" {...field} />
+                {errors.description && (
+                  <FieldError>{errors.description.message}</FieldError>
+                )}
+              </Field>
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="imageUrl"
+            render={({ field }) => (
+              <Field data-invalid={!!errors.imageUrl}>
+                <FieldLabel htmlFor="imageUrl">Image URL</FieldLabel>
+                <Input id="imageUrl" {...field} />
+                {errors.imageUrl && <FieldError>{errors.imageUrl.message}</FieldError>}
+              </Field>
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="displayOrder"
+            render={({ field }) => (
+              <Field data-invalid={!!errors.displayOrder}>
+                <FieldLabel htmlFor="displayOrder">Display order</FieldLabel>
+                <Input
+                  id="displayOrder"
+                  type="number"
+                  {...field}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                />
+                {errors.displayOrder && (
+                  <FieldError>{errors.displayOrder.message}</FieldError>
+                )}
+              </Field>
+            )}
+          />
+
+          {errors.root && (
+            <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              {errors.root.message}
+            </p>
+          )}
+        </FieldGroup>
+
+        <DialogFooter className="mt-4">
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isPending}>
+            {isPending ? "Saving..." : isEdit ? "Save changes" : "Create category"}
+          </Button>
+        </DialogFooter>
+      </form>
+    </>
   );
 }

@@ -22,6 +22,27 @@
       "when": 1789854923279,
       "tag": "0002_groovy_eternity",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1789919701222,
+      "tag": "0003_daily_black_panther",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789963833768,
+      "tag": "0004_cloudy_alice",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1789964812770,
+      "tag": "0005_wise_harry_osborn",
+      "breakpoints": true
     }
   ]
 }

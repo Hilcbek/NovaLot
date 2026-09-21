@@ -14,7 +14,7 @@ Draft version — review this and tell me what to fix, add, or remove. Each life
                      the 6th draft attempt is blocked until one is published or deleted
 Draft 
   → Live          Seller publishes the auction / start_time is reached
-                  → auction_settings row created alongside it
+                  → auction_settings row created alongside it (with autoExtend, maxBidsPerUser, etc.)
                   → BullMQ auction-end job scheduled for end_time
                   → Event logged: auction.created
 Live 
@@ -42,7 +42,7 @@ Unsold
 ```mermaid
 stateDiagram-v2
     [*] --> Draft: Seller starts listing\n(max 5 drafts per seller)
-    Draft --> Live: Published / start_time reached\n(auction_settings created,\nBullMQ job scheduled)
+    Draft --> Live: Published / start_time reached\n(auction_settings created with per-auction rules,\nBullMQ job scheduled)
     Live --> Live: Bid placed (highest bid updates)
     Live --> Live: Auto-extend (anti-sniping window)
     Live --> Closed: BullMQ job fires at end_time

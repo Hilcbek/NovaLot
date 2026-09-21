@@ -96,8 +96,13 @@ export async function PATCH(
       .returning();
 
     return NextResponse.json({ category: updated });
-  } catch (err: any) {
-    if (err?.code === "23505") {
+  } catch (err: unknown) {
+    if (
+      err &&
+      typeof err === "object" &&
+      "code" in err &&
+      err.code === "23505"
+    ) {
       return NextResponse.json(
         { error: "A category with this slug already exists" },
         { status: 409 },

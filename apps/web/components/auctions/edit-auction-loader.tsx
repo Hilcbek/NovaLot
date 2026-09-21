@@ -4,6 +4,7 @@
 import { canEditAuction } from "@novalot/shared/auction";
 import { useAuctionForEdit, useAuthStore } from "@/hooks";
 import { AuctionFormWizard } from "./auction-form-wizard";
+import type { AuctionImage } from "@novalot/shared/db/schema";
 
 export function EditAuctionLoader({ auctionId }: { auctionId: string }) {
   const { data: auction, isLoading } = useAuctionForEdit(auctionId);
@@ -16,7 +17,7 @@ export function EditAuctionLoader({ auctionId }: { auctionId: string }) {
   if (!auction || !user) {
     return (
       <p className="text-sm text-destructive">
-        This auction could not be found, or you don't have access to it.
+        This auction could not be found, or you don&apos;t have access to it.
       </p>
     );
   }
@@ -28,7 +29,7 @@ export function EditAuctionLoader({ auctionId }: { auctionId: string }) {
           This auction can no longer be edited
         </h1>
         <p className="text-sm text-muted-foreground">
-          Auctions can only be edited while they haven't started yet. This
+          Auctions can only be edited while they haven&apos;t started yet. This
           auction is currently <strong>{auction.effectiveStatus}</strong>.
         </p>
       </div>
@@ -44,14 +45,18 @@ export function EditAuctionLoader({ auctionId }: { auctionId: string }) {
         description: auction.description,
         categoryId: auction.categoryId,
         condition: auction.condition,
-        location: auction.location,
         startingPrice: auction.startingPrice,
         reservePrice: auction.reservePrice ?? undefined,
         buyNowPrice: auction.buyNowPrice ?? undefined,
         bidIncrement: auction.bidIncrement,
+        autoExtendEnabled: auction.settings?.autoExtendEnabled ?? false,
+        autoExtendMinutes: auction.settings?.autoExtendMinutes ?? undefined,
+        maxBidsPerUser: auction.settings?.maxBidsPerUser ?? undefined,
+        requireVerifiedBidder: auction.settings?.requireVerifiedBidder ?? false,
+        customRules: auction.settings?.customRules ?? undefined,
         startTime: new Date(auction.startTime),
         endTime: new Date(auction.endTime),
-        images: auction.images.map((img: any) => ({
+        images: auction.images.map((img: AuctionImage) => ({
           fileId: img.fileId,
           url: img.url,
           thumbnailUrl: img.thumbnailUrl,

@@ -14,6 +14,7 @@ import { DetailsStep } from "./steps/details-step";
 import { ImagesStep } from "./steps/images-step";
 import { PricingStep } from "./steps/pricing-step";
 import { ScheduleStep } from "./steps/schedule-step";
+import { SettingsStep } from "./steps/settings-step";
 
 interface AuctionFormWizardProps {
   mode: "create" | "edit";
@@ -37,9 +38,10 @@ export function AuctionFormWizard({
       description: "",
       categoryId: "",
       condition: "",
-      location: "",
       startingPrice: 0,
       bidIncrement: 10,
+      autoExtendEnabled: false,
+      requireVerifiedBidder: false,
       images: [],
       ...defaultValues,
     },
@@ -91,8 +93,9 @@ export function AuctionFormWizard({
         <form onSubmit={form.handleSubmit(onSubmit)}>
           {step === 0 && <DetailsStep />}
           {step === 1 && <PricingStep />}
-          {step === 2 && <ScheduleStep />}
-          {step === 3 && <ImagesStep />}
+          {step === 2 && <SettingsStep />}
+          {step === 3 && <ScheduleStep />}
+          {step === 4 && <ImagesStep />}
 
           {form.formState.errors.root && (
             <p className="mt-4 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">

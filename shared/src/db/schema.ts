@@ -129,7 +129,6 @@ export const auctions = pgTable(
       scale: 2,
     }).notNull(),
 
-    location: text("location").notNull(),
     condition: text("condition").notNull(),
 
     status: auctionStatusEnum("status").notNull().default("draft"),
@@ -180,13 +179,30 @@ export const categoriesRelations = relations(categories, ({ one, many }) => ({
   children: many(categories, { relationName: "categoryHierarchy" }),
 }));
 
+export const auctionSettings = pgTable("auction_settings", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  auctionId: uuid("auction_id")
+    .notNull()
+    .unique()
+    .references(() => auctions.id, { onDelete: "cascade" }),
+
+  autoExtendEnabled: boolean("auto_extend_enabled").notNull().default(false),
+  autoExtendMinutes: integer("auto_extend_minutes"),
+  maxBidsPerUser: integer("max_bids_per_user"),
+  requireVerifiedBidder: boolean("require_verified_bidder")
+    .notNull()
+    .default(false),
+  customRules: text("custom_rules"),
+
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+});
+
 export type Category = typeof categories.$inferSelect;
 export type NewCategory = typeof categories.$inferInsert;
-export const usersRelations = relations(users, ({ many }) => ({
-  verificationTokens: many(verificationTokens),
-}));
-
-// many tokens → one user
 
 export const auctionsRelations = relations(auctions, ({ one, many }) => ({
   category: one(categories, {
@@ -198,7 +214,28 @@ export const auctionsRelations = relations(auctions, ({ one, many }) => ({
     references: [users.id],
   }),
   images: many(auctionImages),
+  settings: one(auctionSettings, {
+    fields: [auctions.id],
+    references: [auctionSettings.auctionId],
+  }),
 }));
+
+export const usersRelations = relations(users, ({ many }) => ({
+  verificationTokens: many(verificationTokens),
+}));
+
+export const auctionSettingsRelations = relations(
+  auctionSettings,
+  ({ one }) => ({
+    auction: one(auctions, {
+      fields: [auctionSettings.auctionId],
+      references: [auctions.id],
+    }),
+  }),
+);
+
+export type AuctionSettings = typeof auctionSettings.$inferSelect;
+export type NewAuctionSettings = typeof auctionSettings.$inferInsert;
 
 export const auctionImagesRelations = relations(auctionImages, ({ one }) => ({
   auction: one(auctions, {

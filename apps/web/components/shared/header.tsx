@@ -7,6 +7,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -24,10 +25,17 @@ import {
   Bell,
   ChevronDown,
   Gavel,
+  Heart,
+  LayoutDashboard,
   LogIn,
   MapPin,
   Menu,
+  Package,
   Search,
+  Settings,
+  Shield,
+  Trophy,
+  User,
   UserPlus,
 } from "lucide-react";
 import Link from "next/link";
@@ -51,11 +59,11 @@ const NAV_LINKS = [
 interface AuthUser {
   name: string;
   avatarUrl?: string;
+  isAdmin: boolean;
 }
 
 interface SiteHeaderProps {
   activePath?: string;
-  user?: AuthUser | null;
   hasUnreadNotifications?: boolean;
 }
 
@@ -70,12 +78,14 @@ export function SiteHeader({
   const authUser = useAuthStore((s) => s.user);
   const logoutMutation = useLogout();
 
-  const user = authUser
+  const user: AuthUser | null = authUser
     ? {
         name: `${authUser.firstName} ${authUser.lastName}`,
         avatarUrl: authUser.avatarUrl ?? undefined,
+        isAdmin: authUser.role === "admin",
       }
     : null;
+
   return (
     <header className="border-b border-border bg-background">
       <div className="flex h-16 items-center gap-4 px-4 sm:h-20 sm:gap-6 sm:px-6 lg:px-8">
@@ -176,20 +186,67 @@ export function SiteHeader({
                   </Avatar>
                   <ChevronDown className="h-4 w-4 text-muted-foreground" />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Account
+                  </DropdownMenuLabel>
                   <DropdownMenuItem asChild>
-                    <Link href="/account">My account</Link>
+                    <Link href="/account" className="gap-2">
+                      <User className="h-4 w-4 text-muted-foreground" />
+                      My account
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/watchlist">Watchlist</Link>
+                    <Link href="/account/selling-settings" className="gap-2">
+                      <Settings className="h-4 w-4 text-muted-foreground" />
+                      Selling settings
+                    </Link>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuLabel className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Activity
+                  </DropdownMenuLabel>
+                  <DropdownMenuItem asChild>
+                    <Link href="/account/auctions" className="gap-2">
+                      <Package className="h-4 w-4 text-muted-foreground" />
+                      My auctions
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/bids">My bids</Link>
+                    <Link href="/watchlist" className="gap-2">
+                      <Heart className="h-4 w-4 text-muted-foreground" />
+                      Watchlist
+                    </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/bids" className="gap-2">
+                      <Trophy className="h-4 w-4 text-muted-foreground" />
+                      My bids
+                    </Link>
+                  </DropdownMenuItem>
+
+                  {user.isAdmin && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuLabel className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Admin
+                      </DropdownMenuLabel>
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin" className="gap-2">
+                          <Shield className="h-4 w-4 text-muted-foreground" />
+                          Admin dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => logoutMutation.mutate()}
                     disabled={logoutMutation.isPending}
+                    className="text-destructive focus:text-destructive"
                   >
                     Log out
                   </DropdownMenuItem>
@@ -218,7 +275,7 @@ export function SiteHeader({
             </div>
           )}
 
-          <div>
+          <div className="hidden lg:block">
             <ModeToggle />
           </div>
 
@@ -312,39 +369,88 @@ export function SiteHeader({
                 </div>
 
                 {/* Auth / account actions */}
-                <div className="flex flex-col gap-2 border-t border-border pt-5">
-                  {user ? (
-                    <>
+                {user ? (
+                  <>
+                    <div className="border-t border-border pt-5">
                       <Button asChild className="w-full">
                         <Link href="/auctions/create" onClick={closeMobileMenu}>
                           Create Auction
                         </Link>
                       </Button>
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <p className="px-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Account
+                      </p>
                       <Link
                         href="/account"
                         onClick={closeMobileMenu}
                         className="flex items-center gap-3 rounded-sm px-2 py-2 text-sm hover:bg-muted"
                       >
-                        <Avatar className="h-8 w-8">
+                        <Avatar className="h-7 w-7">
                           <AvatarImage src={user.avatarUrl} alt={user.name} />
                           <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         My account
                       </Link>
                       <Link
+                        href="/account/selling-settings"
+                        onClick={closeMobileMenu}
+                        className="flex items-center gap-2 rounded-sm px-2 py-2 text-sm text-foreground/80 hover:bg-muted"
+                      >
+                        <Settings className="h-4 w-4 text-muted-foreground" />
+                        Selling settings
+                      </Link>
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <p className="px-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Activity
+                      </p>
+                      <Link
+                        href="/account/auctions"
+                        onClick={closeMobileMenu}
+                        className="flex items-center gap-2 rounded-sm px-2 py-2 text-sm text-foreground/80 hover:bg-muted"
+                      >
+                        <Package className="h-4 w-4 text-muted-foreground" />
+                        My auctions
+                      </Link>
+                      <Link
                         href="/watchlist"
                         onClick={closeMobileMenu}
-                        className="rounded-sm px-2 py-2 text-sm hover:bg-muted"
+                        className="flex items-center gap-2 rounded-sm px-2 py-2 text-sm text-foreground/80 hover:bg-muted"
                       >
+                        <Heart className="h-4 w-4 text-muted-foreground" />
                         Watchlist
                       </Link>
                       <Link
                         href="/bids"
                         onClick={closeMobileMenu}
-                        className="rounded-sm px-2 py-2 text-sm hover:bg-muted"
+                        className="flex items-center gap-2 rounded-sm px-2 py-2 text-sm text-foreground/80 hover:bg-muted"
                       >
+                        <Trophy className="h-4 w-4 text-muted-foreground" />
                         My bids
                       </Link>
+                    </div>
+
+                    {user.isAdmin && (
+                      <div className="flex flex-col gap-1">
+                        <p className="px-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                          Admin
+                        </p>
+                        <Link
+                          href="/admin"
+                          onClick={closeMobileMenu}
+                          className="flex items-center gap-2 rounded-sm px-2 py-2 text-sm text-foreground/80 hover:bg-muted"
+                        >
+                          <LayoutDashboard className="h-4 w-4 text-muted-foreground" />
+                          Admin dashboard
+                        </Link>
+                      </div>
+                    )}
+
+                    <div className="border-t border-border pt-4">
                       <button
                         type="button"
                         onClick={() => {
@@ -352,29 +458,28 @@ export function SiteHeader({
                           logoutMutation.mutate();
                         }}
                         disabled={logoutMutation.isPending}
-                        className="rounded-sm px-2 py-2 text-left text-sm text-destructive hover:bg-muted disabled:opacity-50"
+                        className="w-full rounded-sm px-2 py-2 text-left text-sm text-destructive hover:bg-muted disabled:opacity-50"
                       >
                         Log out
                       </button>
-                    </>
-                  ) : (
-                    <>
-                      <Button variant="outline" asChild className="w-full gap-1.5">
-                        <Link href="/sign-in" onClick={closeMobileMenu}>
-                          <LogIn className="h-4 w-4" />
-                          Sign in
-                        </Link>
-                      </Button>
-                      <Button asChild className="w-full gap-1.5">
-                        <Link href="/sign-up" onClick={closeMobileMenu}>
-                          <UserPlus className="h-4 w-4" />
-                          Sign up
-                        </Link>
-                      </Button>
-                    </>
-                  )}
-                </div>
-
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex flex-col gap-2 border-t border-border pt-5">
+                    <Button variant="outline" asChild className="w-full gap-1.5">
+                      <Link href="/sign-in" onClick={closeMobileMenu}>
+                        <LogIn className="h-4 w-4" />
+                        Sign in
+                      </Link>
+                    </Button>
+                    <Button asChild className="w-full gap-1.5">
+                      <Link href="/sign-up" onClick={closeMobileMenu}>
+                        <UserPlus className="h-4 w-4" />
+                        Sign up
+                      </Link>
+                    </Button>
+                  </div>
+                )}
               </div>
             </SheetContent>
           </Sheet>

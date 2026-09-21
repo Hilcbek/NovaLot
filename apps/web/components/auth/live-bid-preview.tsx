@@ -1,7 +1,6 @@
 // components/auth/live-bid-preview.tsx
 "use client";
 
-import { Gavel } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface MockBid {
@@ -12,11 +11,36 @@ interface MockBid {
 }
 
 const MOCK_BIDS: MockBid[] = [
-  { lot: "1960 Rolex Submariner", category: "Fine Watches", amount: 18500, bidder: "J. M." },
-  { lot: "Untitled, oil on canvas", category: "Fine Art", amount: 42000, bidder: "R. K." },
-  { lot: "Art Deco Diamond Brooch", category: "Fine Jewelry", amount: 7200, bidder: "A. T." },
-  { lot: "1967 Jaguar E-Type", category: "Classic Cars", amount: 128000, bidder: "S. D." },
-  { lot: "1982 Bordeaux, Case of 12", category: "Rare Wine & Spirits", amount: 3400, bidder: "L. P." },
+  {
+    lot: "1960 Rolex Submariner",
+    category: "Fine Watches",
+    amount: 18500,
+    bidder: "J. M.",
+  },
+  {
+    lot: "Untitled, oil on canvas",
+    category: "Fine Art",
+    amount: 42000,
+    bidder: "R. K.",
+  },
+  {
+    lot: "Art Deco Diamond Brooch",
+    category: "Fine Jewelry",
+    amount: 7200,
+    bidder: "A. T.",
+  },
+  {
+    lot: "1967 Jaguar E-Type",
+    category: "Classic Cars",
+    amount: 128000,
+    bidder: "S. D.",
+  },
+  {
+    lot: "1982 Bordeaux, Case of 12",
+    category: "Rare Wine & Spirits",
+    amount: 3400,
+    bidder: "L. P.",
+  },
 ];
 
 export function LiveBidPreview() {

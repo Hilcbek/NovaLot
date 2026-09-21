@@ -1,16 +1,12 @@
 {
   "name": "novalot",
-  "private": true,
-  "workspaces": [
-    "apps/*",
-    "shared"
-  ],
   "author": {
     "name": "Bereket Alemayehu",
     "email": "balemayehu07@gmail.com",
     "url": "https://bfanta.com"
   },
   "description": "This is an auction platform",
+  "private": true,
   "scripts": {
     "dev:web": "bun --filter web dev",
     "dev:socket": "bun --filter socket dev",
@@ -18,10 +14,18 @@
     "build:socket": "bun --filter socket build",
     "db:generate": "bun --filter @novalot/shared db:generate",
     "db:migrate": "bun --filter @novalot/shared db:migrate",
-    "db:push": "bun --filter @novalot/shared db:push"
+    "db:push": "bun --filter @novalot/shared db:push",
+    "lint:web": "bun --filter web lint",
+    "lint:socket": "bun --filter socket lint",
+    "lint": "bun run lint:web && bun run lint:socket",
+    "lint:fix:web": "bun --filter web lint:fix",
+    "lint:fix:socket": "bun --filter socket lint:fix",
+    "lint:fix": "bun run lint:fix:web && bun run lint:fix:socket",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
-  "dependencies": {
-    "imagekit": "^6.0.0",
-    "imagekit-javascript": "^4.0.1"
-  }
+  "workspaces": [
+    "apps/*",
+    "shared"
+  ]
 }

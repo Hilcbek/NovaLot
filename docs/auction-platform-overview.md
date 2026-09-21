@@ -28,14 +28,16 @@ A real-time online auction platform where sellers list items and buyers bid live
 - Selling could later be gated behind a `can_sell` permission flag if verification is ever required — not needed for now.
 
 ## Auction Settings / Rules (per-auction)
-Each auction has a linked `auction_settings` record so sellers can configure rules:
-- **Min bid increment** — smallest amount a new bid must beat the current highest by
-- **Reserve price** — hidden minimum; auction doesn't sell if unmet (optional)
-- **Buy-now price** — instant purchase option to skip bidding (optional)
+Each auction has its own linked `auction_settings` record so sellers can configure rules individually per listing:
 - **Auto-extend (anti-sniping)** — extend the auction if a bid lands in the last X minutes
 - **Max bids per user** — optional cap to prevent bid spamming (optional)
 - **Require verified bidder** — restrict bidding to verified users only
 - **Custom rules** — free-form text field for anything a seller wants to add beyond the structured options
+
+Additionally, core pricing rules are stored directly in the `auctions` table:
+- **Bid increment** — smallest amount a new bid must beat the current highest by
+- **Reserve price** — hidden minimum; auction doesn't sell if unmet (optional)
+- **Buy-now price** — instant purchase option to skip bidding (optional)
 
 ## Event Log (Scoped)
 An `event_logs` table records key business events for auditing and powering the admin activity dashboard — scoped to **auction lifecycle, notifications, payments, and auth/account events** (password reset, password change, account updates). Bid events are NOT logged here — they live only in the `bids` table. Fields: `event_type`, `entity_type`, `entity_id`, `metadata` (jsonb), `created_at`. This is separate from Winston logging, which is for developer debugging, not business/product events.
