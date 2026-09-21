@@ -7,7 +7,10 @@ import { useAuthStore, useCancelAuctionMutation, useMyAuctions } from "@/hooks";
 import { canCancelAuction } from "@novalot/shared/auction";
 import type { AuctionListItem } from "@/api/auctions.api";
 import Link from "next/link";
-const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+const STATUS_VARIANT: Record<
+  string,
+  "default" | "secondary" | "destructive" | "outline"
+> = {
   draft: "outline",
   scheduled: "secondary",
   active: "default",
@@ -35,7 +38,26 @@ export default function MyAuctionsPage() {
 
       <div className="flex flex-col gap-3">
         {auctions?.map((auction: AuctionListItem) => {
-          const canCancel = user && canCancelAuction(auction, user);
+          const canCancel =
+            user &&
+            canCancelAuction(
+              {
+                ...auction,
+                startingPrice: String(auction.startingPrice),
+                currentPrice: String(auction.currentPrice),
+                startTime: new Date(auction.startTime),
+                endTime: new Date(auction.endTime),
+                description: "",
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                categoryId: "",
+                reservePrice: null,
+                buyNowPrice: null,
+                bidIncrement: "",
+                condition: "",
+              },
+              user,
+            );
 
           return (
             <div

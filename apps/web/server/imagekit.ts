@@ -1,7 +1,7 @@
 // apps/web/server/imagekit.ts
 import "server-only";
 import ImageKit from "imagekit";
-import { env } from "../../../shared/src/env.server";
+import { env } from "@novalot/shared/env";
 
 export const imagekit = new ImageKit({
   publicKey: env.IMAGEKIT_PUBLIC_KEY,

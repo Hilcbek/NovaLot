@@ -22,7 +22,9 @@ export interface AuctionListItem {
   currentPrice: number;
   startTime: string;
   endTime: string;
+  status: "draft" | "scheduled" | "active" | "ended" | "cancelled";
   effectiveStatus: string;
+  sellerId: string;
   category: { id: string; name: string; slug: string };
   primaryImage: { url: string; thumbnailUrl?: string } | null;
 }

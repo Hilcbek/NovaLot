@@ -11,13 +11,15 @@
     "./constants": "./src/constants/index.ts",
     "./logger": "./src/utils/logger.ts",
     "./auth-validation": "./src/validation/auth.validation.ts",
-    "./auth": "./src/auth/index.ts",
     "./rate-limit": "./src/rate-limit/index.ts",
     "./category-validation": "./src/validation/category.validation.ts",
     "./category": "./src/category/index.ts",
     "./auction-validation": "./src/validation/auction.validation.ts",
     "./auction": "./src/auction/index.ts",
-    "./seller-settings-validation": "./src/validation/seller-settings.validation.ts"
+    "./seller-settings-validation": "./src/validation/seller-settings.validation.ts",
+    "./env": "./src/env/index.ts",
+    "./auth": "./src/auth/index.ts",
+    "./events": "./src/events/index.ts"
   },
   "scripts": {
     "db:generate": "drizzle-kit generate --config=drizzle.config.ts",

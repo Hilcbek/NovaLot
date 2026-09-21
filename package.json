@@ -22,10 +22,17 @@
     "lint:fix:socket": "bun --filter socket lint:fix",
     "lint:fix": "bun run lint:fix:web && bun run lint:fix:socket",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "prepare": "husky"
   },
   "workspaces": [
     "apps/*",
     "shared"
-  ]
+  ],
+  "devDependencies": {
+    "@commitlint/cli": "19.8.1",
+    "@commitlint/config-conventional": "19.8.1",
+    "husky": "9.1.7",
+    "lint-staged": "17.5.1"
+  }
 }

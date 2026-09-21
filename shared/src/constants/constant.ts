@@ -33,3 +33,5 @@ export const PROTECTED_API_PREFIXES = [
 // /api/auctions is the first case of this — listing/detail are public,
 // create/update/cancel are not.
 export const PROTECTED_API_MUTATION_PREFIXES = ["/api/auctions"];
+
+export const ALLOWED_METHODS = ['POST', 'GET', 'PUT', 'PATCH', 'DELETE']
